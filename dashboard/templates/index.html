@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiverse of Monsoon — Climate Digital Twin & Impact Co-Pilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #131b2e;
+            --bg-card: #1c2640;
+            --border: #2a3759;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --accent-green: #10b981;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: linear-gradient(90deg, #131b2e 0%, #1e1b4b 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-blue);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            display: inline-block;
+            margin-right: 6px;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 360px 1fr 380px;
+            gap: 20px;
+            padding: 24px 32px;
+        }
+        .panel {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 10px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        select, input, button {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        select:focus, input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        button.btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        button.btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        .map-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            height: 100%;
+        }
+        .canvas-wrapper {
+            flex: 1;
+            background: #060911;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 480px;
+        }
+        canvas {
+            image-rendering: pixelated;
+            border-radius: 6px;
+        }
+        .map-overlay {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(19, 27, 46, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 12px;
+        }
+        .timeline-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .timeline-bar input[type=range] {
+            flex: 1;
+            accent-color: var(--accent-cyan);
+            cursor: pointer;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-cyan);
+            margin-top: 4px;
+        }
+        .advisory-box {
+            background: rgba(249, 115, 22, 0.1);
+            border-left: 3px solid var(--accent-orange);
+            padding: 10px 12px;
+            border-radius: 0 6px 6px 0;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .region-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 12px;
+        }
+        .legend-bar {
+            height: 10px;
+            border-radius: 5px;
+            margin: 6px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-brand">
+            <h2>🌌 Multiverse of Monsoon</h2>
+            <span class="badge">Earth-System Digital Twin</span>
+        </div>
+        <div>
+            <span class="status-dot"></span>
+            <span style="font-size: 13px; color: var(--text-secondary);">Inference Engine: <strong style="color:white;">http://localhost:8000</strong> (Ready)</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Left Panel: Controls & Multiverse Shock Injector -->
+        <div class="panel">
+            <div class="panel-title">🎮 Simulation Controller</div>
+
+            <div class="control-group">
+                <label>Climate Variable</label>
+                <select id="channelSelect" onchange="updateVisualization()">
+                    <option value="0">t2m — 2-Meter Temperature (°C)</option>
+                    <option value="1" selected>tp — Total Precipitation (mm/day)</option>
+                    <option value="2">u10 — 10m Zonal Wind (m/s)</option>
+                    <option value="3">v10 — 10m Meridional Wind (m/s)</option>
+                    <option value="4">msl — Mean Sea Level Pressure (hPa)</option>
+                    <option value="5">tcwv — Total Column Water Vapor (kg/m²)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Simulation Mode</label>
+                <select id="simMode" onchange="runSimulation()">
+                    <option value="prime">Timeline Prime (Baseline Rollout)</option>
+                    <option value="shock_bob">Multiverse: Hot Bay of Bengal (+3.0°C)</option>
+                    <option value="shock_wind">Multiverse: Weak Arabian Sea Wind (-5 m/s)</option>
+                    <option value="shock_heatwave">Multiverse: Pre-Monsoon Heatwave (+4.0°C)</option>
+                    <option value="diff">Difference View (Branch vs Prime)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Forecast Horizon</label>
+                <select id="stepSelect">
+                    <option value="10">10 Days (Official Grader Horizon)</option>
+                    <option value="5">5 Days (Short-Range)</option>
+                    <option value="14">14 Days (Extended Rollout)</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" onclick="runSimulation()">⚡ Trigger Live Simulation</button>
+
+            <div class="stat-card">
+                <label>Engine Latency</label>
+                <div class="stat-value" id="latencyStat">142 ms</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top:2px;">Target < 5,000 ms (CPU Limit)</div>
+            </div>
+
+            <div class="stat-card">
+                <label>Grid Resolution</label>
+                <div style="font-size: 13px; font-weight:600; margin-top:4px;">32 × 36 (1° Lat/Lon Indian Domain)</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top:2px;">8°N–39°N, 68°E–103°E</div>
+            </div>
+        </div>
+
+        <!-- Center: Interactive Heatmap Visualization -->
+        <div class="map-container">
+            <div class="canvas-wrapper">
+                <canvas id="climateMap" width="540" height="480"></canvas>
+                <div class="map-overlay">
+                    <div id="overlayTitle" style="font-weight:700; color:var(--accent-cyan);">Total Precipitation (Day 1)</div>
+                    <div id="overlayStats" style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Min: 0.0 mm | Max: 42.5 mm | Mean: 6.8 mm</div>
+                </div>
+            </div>
+
+            <div class="timeline-bar">
+                <label style="min-width: 90px;"><strong id="dayLabel">Day 1</strong> of 10</label>
+                <input type="range" id="daySlider" min="0" max="9" value="0" oninput="onDaySliderChange(this.value)">
+                <button style="padding: 6px 12px; font-size:12px;" onclick="togglePlay()"><span id="playIcon">▶ Play</span></button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Scientific & Socio-Economic Impact Co-Pilot -->
+        <div class="panel">
+            <div class="panel-title">🌾 Impact Co-Pilot & Policy Advisory</div>
+
+            <div class="stat-card">
+                <label>Extreme Flood Cells (>150mm)</label>
+                <div class="stat-value" id="floodCellsStat" style="color:var(--accent-red);">0 Cells</div>
+            </div>
+
+            <div class="stat-card">
+                <label>Kharif Crop Moisture Stress</label>
+                <div class="stat-value" id="cropStressStat" style="color:var(--accent-orange);">18.4%</div>
+            </div>
+
+            <div class="stat-card">
+                <label>Wind Energy Capacity Density</label>
+                <div class="stat-value" id="windPowerStat" style="color:var(--accent-green);">124 W/m²</div>
+            </div>
+
+            <div class="control-group">
+                <label>Regional Agricultural Risk Status</label>
+                <div id="regionalList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Policy Co-Pilot Advisory</label>
+                <div class="advisory-box" id="policyAdvisory">
+                    Simulating live atmospheric trajectory...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentRollout = null;
+        let baselineRollout = null;
+        let perturbedRollout = null;
+        let impactData = null;
+        let currentDay = 0;
+        let isPlaying = false;
+        let playInterval = null;
+
+        const CHANNELS_INFO = [
+            { name: "2m Temperature", unit: "°C", offset: -273.15, min: 10, max: 48, colors: ["#313695", "#4575b4", "#74add1", "#fee090", "#f46d43", "#a50026"] },
+            { name: "Total Precipitation", unit: "mm/day", offset: 0, min: 0, max: 50, colors: ["#ffffd9", "#c7e9b4", "#41b6c4", "#225ea8", "#081d58"] },
+            { name: "10m Zonal Wind", unit: "m/s", offset: 0, min: -15, max: 15, colors: ["#2166ac", "#67a9cf", "#f7f7f7", "#ef8a62", "#b2182b"] },
+            { name: "10m Meridional Wind", unit: "m/s", offset: 0, min: -15, max: 15, colors: ["#2166ac", "#67a9cf", "#f7f7f7", "#ef8a62", "#b2182b"] },
+            { name: "Sea Level Pressure", unit: "hPa", offset: 0.01, min: 990, max: 1018, colors: ["#40004b", "#762a83", "#9970ab", "#d9f0d3", "#1b7837"] },
+            { name: "Total Column Water Vapor", unit: "kg/m²", offset: 0, min: 5, max: 65, colors: ["#f7fcf5", "#c7e9c0", "#74c476", "#238b45", "#00441b"] }
+        ];
+
+        async function runSimulation() {
+            const mode = document.getElementById("simMode").value;
+            const steps = parseInt(document.getElementById("stepSelect").value);
+            const t0 = performance.now();
+
+            try {
+                const resp = await fetch("/api/simulate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mode: mode, steps: steps })
+                });
+                const data = await resp.json();
+                currentRollout = data.rollout;
+                baselineRollout = data.baseline;
+                perturbedRollout = data.perturbed;
+                impactData = data.impact;
+
+                const latMs = Math.round(data.inference_ms || (performance.now() - t0));
+                document.getElementById("latencyStat").innerText = `${latMs} ms`;
+
+                updateImpactUI(impactData);
+                updateVisualization();
+            } catch (err) {
+                console.error("Simulation error:", err);
+            }
+        }
+
+        function updateImpactUI(impact) {
+            if (!impact) return;
+            document.getElementById("floodCellsStat").innerText = `${impact.high_flood_cells_count} Cells`;
+            document.getElementById("cropStressStat").innerText = `${impact.crop_stress_index_pct}%`;
+            document.getElementById("windPowerStat").innerText = `${impact.mean_wind_power_w_m2} W/m²`;
+
+            // Regional List
+            const regContainer = document.getElementById("regionalList");
+            regContainer.innerHTML = "";
+            (impact.regional_insights || []).forEach(r => {
+                const color = r.status.includes("Warning") ? "var(--accent-red)" : (r.status.includes("Stress") ? "var(--accent-orange)" : "var(--accent-green)");
+                regContainer.innerHTML += `
+                    <div class="region-row">
+                        <span>${r.region.split("(")[0]}</span>
+                        <span style="color:${color}; font-weight:600;">${r.status}</span>
+                    </div>
+                `;
+            });
+
+            // Policy Advisory
+            const advBox = document.getElementById("policyAdvisory");
+            advBox.innerText = (impact.policy_advisories && impact.policy_advisories[0]) || "Normal operations.";
+        }
+
+        function updateVisualization() {
+            if (!currentRollout) return;
+            const cIdx = parseInt(document.getElementById("channelSelect").value);
+            const ch = CHANNELS_INFO[cIdx];
+            const canvas = document.getElementById("climateMap");
+            const ctx = canvas.getContext("2d");
+
+            const grid = currentRollout[currentDay][cIdx]; // [32, 36]
+            const h = grid.length;
+            const w = grid[0].length;
+            const cellW = canvas.width / w;
+            const cellH = canvas.height / h;
+
+            let minVal = Infinity, maxVal = -Infinity, sum = 0;
+
+            for (let r = 0; r < h; r++) {
+                for (let c = 0; c < w; c++) {
+                    let val = grid[r][c];
+                    if (cIdx === 0) val += ch.offset; // K to C
+                    if (cIdx === 4) val *= ch.offset; // Pa to hPa
+
+                    minVal = Math.min(minVal, val);
+                    maxVal = Math.max(maxVal, val);
+                    sum += val;
+
+                    // Normalize to 0..1
+                    const norm = Math.max(0, Math.min(1, (val - ch.min) / (ch.max - ch.min)));
+                    ctx.fillStyle = interpolateColor(ch.colors, norm);
+                    ctx.fillRect(c * cellW, r * cellH, cellW + 0.5, cellH + 0.5);
+                }
+            }
+
+            const meanVal = (sum / (h * w)).toFixed(1);
+            document.getElementById("overlayTitle").innerText = `${ch.name} (Day ${currentDay + 1})`;
+            document.getElementById("overlayStats").innerText = `Min: ${minVal.toFixed(1)} ${ch.unit} | Max: ${maxVal.toFixed(1)} ${ch.unit} | Mean: ${meanVal} ${ch.unit}`;
+        }
+
+        function interpolateColor(colors, t) {
+            const idx = t * (colors.length - 1);
+            const i = Math.floor(idx);
+            const rem = idx - i;
+            if (i >= colors.length - 1) return colors[colors.length - 1];
+            return lerpHex(colors[i], colors[i + 1], rem);
+        }
+
+        function lerpHex(a, b, t) {
+            const ah = parseInt(a.replace(/#/g, ''), 16),
+                  ar = ah >> 16, ag = (ah >> 8) & 0xff, ab = ah & 0xff,
+                  bh = parseInt(b.replace(/#/g, ''), 16),
+                  br = bh >> 16, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
+            const rr = Math.round(ar + t * (br - ar)),
+                  rg = Math.round(ag + t * (bg - ag)),
+                  rb = Math.round(ab + t * (bb - ab));
+            return `rgb(${rr},${rg},${rb})`;
+        }
+
+        function onDaySliderChange(val) {
+            currentDay = parseInt(val);
+            document.getElementById("dayLabel").innerText = `Day ${currentDay + 1}`;
+            updateVisualization();
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            document.getElementById("playIcon").innerText = isPlaying ? "⏸ Pause" : "▶ Play";
+            if (isPlaying) {
+                playInterval = setInterval(() => {
+                    currentDay = (currentDay + 1) % 10;
+                    document.getElementById("daySlider").value = currentDay;
+                    document.getElementById("dayLabel").innerText = `Day ${currentDay + 1}`;
+                    updateVisualization();
+                }, 800);
+            } else {
+                clearInterval(playInterval);
+            }
+        }
+
+        window.onload = () => {
+            runSimulation();
+        };
+    </script>
+</body>
+</html>
