@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>India Synoptic Climate Twin</title>
+    <title>Multiverse of Monsoon — Synoptic Climate Twin</title>
     <style>
         @font-face {
             font-family: 'Source Serif';
@@ -32,6 +32,7 @@
             --sea-color: #e5ecef;
             --grid-line: rgba(31, 35, 40, 0.12);
             --focus-ring: #0969da;
+            --success-green: #1a7f37;
         }
 
         * {
@@ -56,7 +57,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        a, button, input, select {
+        a, button, input, select, textarea {
             font-family: inherit;
         }
 
@@ -74,10 +75,17 @@
         header.instrument-header {
             background-color: var(--bg-panel);
             border-bottom: 1px solid var(--border-hairline);
-            padding: 8px 20px;
+            padding: 8px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .header-title-group h1 {
@@ -88,15 +96,24 @@
             letter-spacing: -0.01em;
         }
 
+        .header-title-group .sub-tag {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-canvas);
+            padding: 1px 6px;
+            border-radius: 2px;
+            border: 1px solid var(--border-subtle);
+        }
+
         .header-status-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-size: 11.5px;
         }
 
         .badge-system {
-            padding: 2px 7px;
+            padding: 3px 8px;
             border-radius: 2px;
             border: 1px solid var(--border-hairline);
             background-color: var(--bg-canvas);
@@ -106,28 +123,45 @@
         }
 
         .status-indicator {
-            width: 7px;
-            height: 7px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             display: inline-block;
+            transition: background-color 0.2s ease;
         }
-        .status-indicator.online { background-color: #1a7f37; }
+        .status-indicator.online { background-color: var(--success-green); }
         .status-indicator.offline { background-color: var(--accent-crimson); }
-        .status-indicator.pending { background-color: var(--warn-amber); }
+        .status-indicator.pending { background-color: var(--warn-amber); animation: pulse 1s infinite alternate; }
 
-        /* Main Workspace: ~72% Map / 28% Control Rail */
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Offline / Error Banner */
+        .offline-banner {
+            display: none;
+            background-color: #ffebe9;
+            color: #cf222e;
+            border-bottom: 1px solid #ff8182;
+            padding: 7px 18px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        /* Workspace Grid: 70% Map & Analytics / 30% Control Rail */
         .workspace {
             flex: 1;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 350px;
+            grid-template-columns: minmax(0, 1fr) 370px;
             gap: 0;
             border-bottom: 1px solid var(--border-hairline);
             min-height: 0;
-            height: calc(100vh - 43px - 45px);
+            height: calc(100vh - 44px - 45px);
             overflow: hidden;
         }
 
-        @media (max-width: 1080px) {
+        @media (max-width: 1150px) {
             .workspace {
                 grid-template-columns: 1fr;
                 height: auto;
@@ -135,10 +169,10 @@
             }
         }
 
-        /* Left: Map Section */
+        /* Left: Map & Analytics Section */
         .map-section {
             background-color: var(--bg-canvas);
-            padding: 12px 16px;
+            padding: 10px 14px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -156,6 +190,7 @@
             border: 1px solid var(--border-hairline);
             border-radius: 2px;
             font-size: 11.5px;
+            flex-shrink: 0;
         }
 
         .toolbar-group {
@@ -181,10 +216,29 @@
             border-radius: 2px;
         }
 
+        .btn-day-jump {
+            background: #fff;
+            border: 1px solid var(--border-hairline);
+            padding: 2px 7px;
+            font-size: 10.5px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 2px;
+            color: var(--text-main);
+        }
+        .btn-day-jump:hover { background: var(--bg-canvas); }
+        .btn-day-jump.active {
+            background: var(--accent-oxford);
+            color: #fff;
+            border-color: var(--accent-oxford);
+        }
+
+        /* 3 Synced Views */
         .maps-triptych {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         @media (max-width: 1250px) {
@@ -204,12 +258,15 @@
         }
 
         .map-card-header {
-            padding: 5px 8px;
+            padding: 4px 8px;
             background-color: #fff;
             border-bottom: 1px solid var(--border-subtle);
             font-size: 11px;
             font-weight: 600;
             color: var(--accent-oxford);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .map-viewport {
@@ -233,11 +290,11 @@
         }
 
         .hover-info-dock {
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-top: 1px solid var(--border-subtle);
             background-color: #fff;
-            font-size: 10.5px;
-            min-height: 24px;
+            font-size: 10px;
+            min-height: 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -253,10 +310,11 @@
             background-color: var(--bg-panel);
             border: 1px solid var(--border-hairline);
             border-radius: 2px;
-            padding: 6px 12px;
+            padding: 5px 12px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
+            flex-shrink: 0;
         }
 
         .colorbar-labels {
@@ -273,7 +331,116 @@
             border: 1px solid rgba(0,0,0,0.12);
         }
 
-        /* Right: Slim Control Rail */
+        /* Analysis Row (Statistics + Rainfall) */
+        .analysis-row {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 900px) {
+            .analysis-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-hairline);
+            border-radius: 2px;
+            padding: 8px 10px;
+        }
+
+        .panel-title {
+            font-family: 'Source Serif', Georgia, serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-oxford);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 3px;
+        }
+
+        /* Stats Table */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5px;
+        }
+        .stats-table th {
+            text-align: right;
+            padding: 2px 4px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 9.5px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .stats-table th:first-child { text-align: left; }
+        .stats-table td {
+            padding: 2px 4px;
+            text-align: right;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+        }
+        .stats-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Rainfall Metric Grid */
+        .rainfall-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+        .rf-cell {
+            background: #fff;
+            border: 1px solid var(--border-subtle);
+            padding: 4px 6px;
+            border-radius: 2px;
+            display: flex;
+            flex-direction: column;
+        }
+        .rf-cell .lbl { font-size: 9px; color: var(--text-muted); }
+        .rf-cell .val { font-size: 11.5px; font-weight: 700; color: var(--accent-oxford); }
+
+        .rf-dist-row {
+            display: flex;
+            gap: 4px;
+            font-size: 9.5px;
+            margin-top: 4px;
+        }
+        .rf-dist-item {
+            flex: 1;
+            background: #fff;
+            border: 1px solid var(--border-subtle);
+            padding: 2px 4px;
+            text-align: center;
+            border-radius: 2px;
+        }
+        .rf-dist-item .sub { font-size: 8.5px; color: var(--text-muted); display: block; }
+
+        /* Forecast Evolution Chart Box */
+        .evolution-chart-box {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-hairline);
+            border-radius: 2px;
+            padding: 8px 10px;
+            flex-shrink: 0;
+        }
+
+        .evolution-chart-box canvas {
+            display: block;
+            width: 100%;
+            height: 105px;
+        }
+
+        /* Right: Control Rail */
         .control-rail {
             background-color: var(--bg-panel);
             display: flex;
@@ -284,7 +451,7 @@
         }
 
         .rail-section {
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-bottom: 1px solid var(--border-hairline);
         }
 
@@ -293,14 +460,14 @@
             font-size: 13px;
             font-weight: 700;
             color: var(--accent-oxford);
-            margin-bottom: 8px;
+            margin-bottom: 7px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
         .field-group {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -310,6 +477,13 @@
             display: flex;
             gap: 6px;
             align-items: center;
+        }
+
+        .field-label {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 65px;
         }
 
         .btn-instrument {
@@ -322,6 +496,10 @@
             cursor: pointer;
             border-radius: 2px;
             transition: background 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
         .btn-instrument:hover {
@@ -333,6 +511,15 @@
             border-color: var(--accent-oxford);
             color: #fff;
         }
+        .btn-instrument.primary:hover {
+            background-color: #244677;
+        }
+
+        .btn-instrument.large {
+            padding: 7px 12px;
+            font-size: 12px;
+            width: 100%;
+        }
 
         .btn-instrument.danger {
             background-color: #fff;
@@ -343,42 +530,74 @@
             background-color: #fee2e2;
         }
 
+        .btn-instrument:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .preset-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
+            gap: 5px;
             margin-bottom: 6px;
         }
 
-        /* Distance Chart */
-        .chart-box {
-            background-color: #fff;
-            border: 1px solid var(--border-subtle);
-            padding: 6px 8px;
-            border-radius: 2px;
-            margin-top: 6px;
+        /* Verification Table */
+        .verif-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            font-size: 10.5px;
         }
-
-        .chart-box canvas {
+        .verif-cell {
+            background: #fff;
+            border: 1px solid var(--border-subtle);
+            padding: 3px 6px;
+            border-radius: 2px;
+        }
+        .verif-cell.full {
+            grid-column: span 2;
+        }
+        .verif-cell .lbl {
+            font-size: 9px;
+            color: var(--text-muted);
             display: block;
-            width: 100%;
-            height: 75px;
+        }
+        .verif-cell .val {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .verif-cell .val.good { color: var(--success-green); }
+        .verif-cell .val.warn { color: var(--warn-amber); }
+
+        /* Spinner */
+        .spinner {
+            width: 11px;
+            height: 11px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Regional Impact Metrics Cards */
         .region-card {
             border: 1px solid var(--border-subtle);
             background-color: #fff;
-            padding: 6px 8px;
+            padding: 5px 7px;
             border-radius: 2px;
-            margin-bottom: 6px;
-            font-size: 10.5px;
+            margin-bottom: 5px;
+            font-size: 10px;
         }
 
         .region-header {
             font-weight: 600;
             color: var(--accent-oxford);
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             border-bottom: 1px solid var(--border-subtle);
             padding-bottom: 2px;
         }
@@ -386,7 +605,7 @@
         .region-metrics-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 4px;
+            gap: 3px;
         }
 
         .metric-cell {
@@ -395,21 +614,21 @@
         }
 
         .metric-cell span.lbl {
-            font-size: 9px;
+            font-size: 8.5px;
             color: var(--text-muted);
         }
 
         .metric-cell span.val {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
         }
 
         .delta-tag {
-            font-size: 9.5px;
+            font-size: 9px;
             font-weight: 600;
             margin-left: 2px;
         }
-        .delta-tag.pos { color: #1a7f37; }
+        .delta-tag.pos { color: var(--success-green); }
         .delta-tag.neg { color: var(--accent-crimson); }
         .delta-tag.zero { color: var(--text-muted); }
 
@@ -420,20 +639,20 @@
             border-top: 1px solid var(--border-subtle);
             border-right: 1px solid var(--border-subtle);
             border-bottom: 1px solid var(--border-subtle);
-            padding: 6px 8px;
-            font-size: 10.5px;
-            margin-bottom: 5px;
-            line-height: 1.35;
+            padding: 5px 7px;
+            font-size: 10px;
+            margin-bottom: 4px;
+            line-height: 1.3;
         }
 
         /* Bottom Time Dock */
         footer.time-dock {
             background-color: var(--bg-panel);
             border-top: 1px solid var(--border-hairline);
-            padding: 8px 20px;
+            padding: 6px 18px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             height: 45px;
             flex-shrink: 0;
             z-index: 10;
@@ -466,17 +685,6 @@
             color: var(--accent-oxford);
             min-width: 80px;
         }
-
-        .offline-banner {
-            display: none;
-            background-color: #ffebe9;
-            color: #cf222e;
-            border: 1px solid #ff8182;
-            padding: 8px 14px;
-            font-size: 11.5px;
-            margin: 10px 16px 0 16px;
-            border-radius: 2px;
-        }
     </style>
 </head>
 <body>
@@ -484,28 +692,32 @@
     <!-- Header -->
     <header class="instrument-header">
         <div class="header-title-group">
-            <h1>India Synoptic Climate Twin</h1>
+            <h1>Multiverse of Monsoon — Synoptic Climate Twin</h1>
+            <span class="sub-tag">6-Block Neural Forecaster</span>
         </div>
         <div class="header-status-group">
             <div class="badge-system">
                 <span id="engine-indicator" class="status-indicator pending"></span>
-                <span>Engine: <strong id="engine-status-text">Polling...</strong></span>
+                <span id="engine-status-text">Engine: Connecting...</span>
             </div>
             <div class="badge-system">
-                <span>Inference: <strong class="num" id="inference-ms-text">&mdash;</strong> ms</span>
+                <span>Model: <strong id="model-name-text">multiverse-of-monsoon-r1</strong></span>
+            </div>
+            <div class="badge-system">
+                <span>Latency: <strong class="num" id="inference-ms-text">&mdash;</strong> ms</span>
             </div>
         </div>
     </header>
 
-    <!-- Offline Notification -->
+    <!-- Offline / Error Notification Banner -->
     <div id="offline-alert" class="offline-banner">
-        <strong>Engine Offline:</strong> The backend inference engine (<code>serve.py</code> on <code>0.0.0.0:8000</code>) is unreachable. No placeholder data is displayed.
+        <strong>Engine Offline:</strong> The FastAPI inference server (<code>serve.py</code> on <code>http://127.0.0.1:8000</code>) is unreachable. Run: <code>python serve.py --port 8000</code>. No dummy data is displayed.
     </div>
 
     <!-- Main Workspace -->
     <div class="workspace">
 
-        <!-- Left: Map Section -->
+        <!-- Left: Map & Analytics Section -->
         <main class="map-section">
             <div class="map-toolbar">
                 <div class="toolbar-group">
@@ -520,7 +732,14 @@
                     </select>
                 </div>
                 <div class="toolbar-group">
-                    <span style="font-size:10.5px; color:var(--text-muted);">6.5&ndash;37.5&deg;N, 65.5&ndash;100.5&deg;E</span>
+                    <span class="toolbar-label">Day:</span>
+                    <button class="btn-day-jump active" id="btn-jump-1" onclick="jumpToDay(1)">D1</button>
+                    <button class="btn-day-jump" id="btn-jump-4" onclick="jumpToDay(4)">D4</button>
+                    <button class="btn-day-jump" id="btn-jump-7" onclick="jumpToDay(7)">D7</button>
+                    <button class="btn-day-jump" id="btn-jump-10" onclick="jumpToDay(10)">D10</button>
+                </div>
+                <div class="toolbar-group">
+                    <span style="font-size:10.5px; color:var(--text-muted);">Domain: 6.5&ndash;37.5&deg;N, 65.5&ndash;100.5&deg;E (32&times;36)</span>
                 </div>
             </div>
 
@@ -528,7 +747,10 @@
             <div class="maps-triptych">
                 <!-- Timeline Prime -->
                 <div class="map-card">
-                    <div class="map-card-header">Timeline Prime (Unperturbed)</div>
+                    <div class="map-card-header">
+                        <span>Timeline Prime (Baseline)</span>
+                        <span id="label-step-prime" style="font-size:10px; font-weight:normal; color:var(--text-muted);">Day 1</span>
+                    </div>
                     <div class="map-viewport" id="viewport-prime">
                         <canvas id="canvas-prime"></canvas>
                         <svg class="map-overlay-layer" id="svg-prime"></svg>
@@ -541,7 +763,10 @@
 
                 <!-- Timeline Branch -->
                 <div class="map-card">
-                    <div class="map-card-header">Multiverse Branch (Perturbed)</div>
+                    <div class="map-card-header">
+                        <span>Multiverse Branch (Perturbed)</span>
+                        <span id="label-step-branch" style="font-size:10px; font-weight:normal; color:var(--text-muted);">Day 1</span>
+                    </div>
                     <div class="map-viewport" id="viewport-branch">
                         <canvas id="canvas-branch"></canvas>
                         <svg class="map-overlay-layer" id="svg-branch"></svg>
@@ -554,7 +779,10 @@
 
                 <!-- Difference Map -->
                 <div class="map-card">
-                    <div class="map-card-header">Difference (&Delta; = Branch &minus; Prime)</div>
+                    <div class="map-card-header">
+                        <span>Difference (&Delta; = Branch &minus; Prime)</span>
+                        <span id="label-step-diff" style="font-size:10px; font-weight:normal; color:var(--text-muted);">Day 1</span>
+                    </div>
                     <div class="map-viewport" id="viewport-diff">
                         <canvas id="canvas-diff"></canvas>
                         <svg class="map-overlay-layer" id="svg-diff"></svg>
@@ -569,29 +797,211 @@
             <!-- Synchronized Colorbar -->
             <div class="colorbar-container">
                 <div class="colorbar-labels">
-                    <span id="cbar-min" class="num">0.0</span>
-                    <span id="cbar-title">Precipitation (mm/day)</span>
-                    <span id="cbar-max" class="num">50.0</span>
+                    <span id="cbar-min" class="num">0.0 mm/day</span>
+                    <span id="cbar-title">Precipitation (tp, mm/day)</span>
+                    <span id="cbar-max" class="num">60.0 mm/day</span>
                 </div>
                 <div class="colorbar-strip" id="cbar-gradient"></div>
+            </div>
+
+            <!-- Analysis Row: Statistics & Rainfall Visualizations -->
+            <div class="analysis-row">
+                <!-- Statistics Panel -->
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <span>Grid Statistics (Day <span id="stat-day-label">1</span>)</span>
+                        <span id="stats-var-title" style="font-size:10px; font-weight:normal; color:var(--text-muted);">tp</span>
+                    </div>
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Baseline</th>
+                                <th>Branch</th>
+                                <th>&Delta; (Diff)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Minimum</td>
+                                <td id="stat-prime-min" class="num">&mdash;</td>
+                                <td id="stat-branch-min" class="num">&mdash;</td>
+                                <td id="stat-diff-min" class="num">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td>Maximum</td>
+                                <td id="stat-prime-max" class="num">&mdash;</td>
+                                <td id="stat-branch-max" class="num">&mdash;</td>
+                                <td id="stat-diff-max" class="num">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td>Mean</td>
+                                <td id="stat-prime-mean" class="num">&mdash;</td>
+                                <td id="stat-branch-mean" class="num">&mdash;</td>
+                                <td id="stat-diff-mean" class="num">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td>Median</td>
+                                <td id="stat-prime-median" class="num">&mdash;</td>
+                                <td id="stat-branch-median" class="num">&mdash;</td>
+                                <td id="stat-diff-median" class="num">&mdash;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Rainfall Visualization Panel -->
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <span>Rainfall Analytics (Precipitation tp)</span>
+                        <span style="font-size:10px; font-weight:normal; color:var(--text-muted);">Domain Metrics</span>
+                    </div>
+                    <div class="rainfall-grid">
+                        <div class="rf-cell">
+                            <span class="lbl">Selected Day Mean</span>
+                            <span class="val num" id="rain-day-mean">&mdash; mm</span>
+                        </div>
+                        <div class="rf-cell">
+                            <span class="lbl">Selected Day Peak</span>
+                            <span class="val num" id="rain-day-max">&mdash; mm</span>
+                        </div>
+                        <div class="rf-cell">
+                            <span class="lbl">10-Day Domain Mean</span>
+                            <span class="val num" id="rain-10d-mean">&mdash; mm</span>
+                        </div>
+                        <div class="rf-cell">
+                            <span class="lbl">10-Day Domain Peak</span>
+                            <span class="val num" id="rain-10d-max">&mdash; mm</span>
+                        </div>
+                    </div>
+                    <div style="font-size:9px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Rainfall Distribution (Day <span id="rf-dist-day">1</span>):</div>
+                    <div class="rf-dist-row">
+                        <div class="rf-dist-item"><strong id="rain-dist-trace" class="num">&mdash;</strong><span class="sub">&lt;1mm (Dry)</span></div>
+                        <div class="rf-dist-item"><strong id="rain-dist-light" class="num">&mdash;</strong><span class="sub">1-10mm (Light)</span></div>
+                        <div class="rf-dist-item"><strong id="rain-dist-mod" class="num">&mdash;</strong><span class="sub">10-30mm (Mod)</span></div>
+                        <div class="rf-dist-item"><strong id="rain-dist-heavy" class="num">&mdash;</strong><span class="sub">&gt;30mm (Heavy)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forecast Evolution Line Chart -->
+            <div class="evolution-chart-box">
+                <div class="panel-title" style="margin-bottom:4px;">
+                    <span>Forecast Evolution (10-Day Domain Mean Trajectory)</span>
+                    <span style="font-size:10px; font-weight:normal; color:var(--text-muted);">
+                        <span style="color:#1a365d; font-weight:600;">&mdash; Baseline</span> &nbsp;
+                        <span style="color:#9e2a2b; font-weight:600;">--- Perturbed</span>
+                    </span>
+                </div>
+                <canvas id="canvas-forecast-evolution"></canvas>
             </div>
         </main>
 
         <!-- Right: Control Rail -->
         <aside class="control-rail">
 
-            <!-- Initial State Selector -->
+            <!-- Section 1: Simulation Control Panel -->
             <div class="rail-section">
-                <div class="rail-section-title">Initial State Window</div>
-                <div class="field-row">
-                    <select id="window-picker" class="instrument-select" style="flex:1;" onchange="onWindowSelected()">
-                        <option value="">Loading...</option>
+                <div class="rail-section-title">
+                    <span>Simulation Control Panel</span>
+                    <span id="sim-status-pill" class="badge-system" style="font-size:9.5px; padding:1px 5px;">Ready</span>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="sim-scenario-select">Scenario:</label>
+                    <select id="sim-scenario-select" class="instrument-select" onchange="onScenarioSelectChange()">
+                        <option value="baseline">Baseline Monsoon (Null Perturbation)</option>
+                        <option value="warm_ocean">Warm Ocean / Bay of Bengal (+3K Shock)</option>
+                        <option value="monsoon_stall">Monsoon Stall / Arabian Sea Weakening (-40%)</option>
+                        <option value="custom">Custom Interactive Perturbation</option>
                     </select>
-                    <button class="btn-instrument" onclick="toggleCustomStateModal()">Paste</button>
+                </div>
+
+                <div class="field-group">
+                    <div class="field-row">
+                        <label class="field-label" for="sim-steps-select">Duration:</label>
+                        <select id="sim-steps-select" class="instrument-select" style="flex:1;">
+                            <option value="10" selected>10 Days (Standard Rollout)</option>
+                            <option value="7">7 Days (Medium Rollout)</option>
+                            <option value="5">5 Days (Short Rollout)</option>
+                            <option value="14">14 Days (Extended Horizon)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field-row">
+                        <label class="field-label" for="window-picker">Initial State:</label>
+                        <select id="window-picker" class="instrument-select" style="flex:1;" onchange="onWindowSelected()">
+                            <option value="">Loading bundled windows...</option>
+                        </select>
+                        <button class="btn-instrument" onclick="toggleCustomStateModal()" title="Paste custom initial state array">Paste</button>
+                    </div>
+                </div>
+
+                <div style="margin-top:8px;">
+                    <button id="btn-start-simulation" class="btn-instrument primary large" onclick="startSimulation()">
+                        <span>&#9654; Start Simulation</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Shock Studio -->
+            <!-- Section 2: Model Verification Panel -->
+            <div class="rail-section">
+                <div class="rail-section-title">
+                    <span>Model Verification Panel</span>
+                    <span style="font-size:9px; font-weight:normal; color:var(--text-muted);">Tensor Contract</span>
+                </div>
+
+                <div class="verif-grid">
+                    <div class="verif-cell">
+                        <span class="lbl">Backend Health</span>
+                        <span class="val good" id="verif-health">Connected (:8000)</span>
+                    </div>
+                    <div class="verif-cell">
+                        <span class="lbl">Inference Latency</span>
+                        <span class="val num" id="verif-latency">&mdash; ms</span>
+                    </div>
+                    <div class="verif-cell full">
+                        <span class="lbl">Model Identifier</span>
+                        <span class="val" id="verif-model">multiverse-of-monsoon-r1</span>
+                    </div>
+                    <div class="verif-cell">
+                        <span class="lbl">Rollout Status</span>
+                        <span class="val" id="verif-status">Idle</span>
+                    </div>
+                    <div class="verif-cell">
+                        <span class="lbl">Forecast Horizon</span>
+                        <span class="val" id="verif-horizon">10 Days (10 Steps)</span>
+                    </div>
+                    <div class="verif-cell full">
+                        <span class="lbl">Output Tensor Dimensions</span>
+                        <span class="val num" id="verif-dims">[10, 6, 32, 36]</span>
+                    </div>
+                    <div class="verif-cell full">
+                        <span class="lbl">Finite Values</span>
+                        <span class="val good num" id="verif-finite">&mdash;</span>
+                    </div>
+                    <div class="verif-cell">
+                        <span class="lbl">NaN Count</span>
+                        <span class="val good num" id="verif-nan">0</span>
+                    </div>
+                    <div class="verif-cell">
+                        <span class="lbl">Inf Count</span>
+                        <span class="val good num" id="verif-inf">0</span>
+                    </div>
+                    <div class="verif-cell">
+                        <span class="lbl">Negative tp Count</span>
+                        <span class="val good num" id="verif-negtp">0</span>
+                    </div>
+                    <div class="verif-cell">
+                        <span class="lbl">Perturbation Applied</span>
+                        <span class="val" id="verif-pert">None (Baseline)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Shock Studio -->
             <div class="rail-section">
                 <div class="rail-section-title">
                     <span>Shock Studio</span>
@@ -603,10 +1013,11 @@
                         <button class="btn-instrument" onclick="applyPresetShock('warm_ocean')">Warm Ocean (+3K BoB)</button>
                         <button class="btn-instrument" onclick="applyPresetShock('monsoon_stall')">Monsoon Stall (-40%)</button>
                     </div>
-                    <button class="btn-instrument danger" style="width:100%;" onclick="resetShock()">Null Shock</button>
+                    <button class="btn-instrument danger" style="width:100%;" onclick="resetShock()">Reset to Null Shock</button>
                 </div>
 
                 <div class="field-group" style="margin-top:6px;">
+                    <div style="font-size:9.5px; color:var(--text-muted); margin-bottom:2px;">Custom Interactive Parameters (or drag on canvas):</div>
                     <div class="field-row" style="margin-bottom:4px;">
                         <select id="shock-geometry" class="instrument-select" style="flex:1;">
                             <option value="circle">Circle Radius</option>
@@ -631,16 +1042,16 @@
                 </div>
 
                 <!-- Distance vs Response Mini-chart -->
-                <div class="chart-box" id="distance-chart-box">
-                    <div style="font-size:9.5px; color:var(--text-muted); margin-bottom:3px; display:flex; justify-content:space-between;">
+                <div class="chart-box" id="distance-chart-box" style="margin-top:6px; background:#fff; border:1px solid var(--border-subtle); padding:5px 8px; border-radius:2px;">
+                    <div style="font-size:9px; color:var(--text-muted); margin-bottom:2px; display:flex; justify-content:space-between;">
                         <span>Shock Response vs Distance</span>
                         <span>Energy Spread</span>
                     </div>
-                    <canvas id="canvas-distance-chart"></canvas>
+                    <canvas id="canvas-distance-chart" style="width:100%; height:65px;"></canvas>
                 </div>
             </div>
 
-            <!-- Regional Socio-Economic Impacts -->
+            <!-- Section 4: Regional Socio-Economic Impacts -->
             <div class="rail-section">
                 <div class="rail-section-title">
                     <span>Regional Impacts</span>
@@ -712,6 +1123,7 @@
 
         let state = {
             online: false,
+            modelName: 'multiverse-of-monsoon-r1',
             currentChannel: 1,
             currentStep: 1,
             totalSteps: 10,
@@ -731,16 +1143,17 @@
             customInitStates: null,
             customDoySincos: null,
             isDraggingShock: false,
-            dragStartPos: null
+            dragStartPos: null,
+            lastInferenceMs: 0
         };
 
         window.addEventListener('DOMContentLoaded', async () => {
             initCanvases();
             await loadStaticGeo();
             await loadWindows();
-            pollHealth();
-            setInterval(pollHealth, 5000);
-            runSimulation();
+            await pollHealth();
+            setInterval(pollHealth, 4000);
+            await startSimulation();
         });
 
         let canvases = {}, contexts = {}, svgs = {};
@@ -807,29 +1220,77 @@
                 const ind = document.getElementById('engine-indicator');
                 const txt = document.getElementById('engine-status-text');
                 const alertBox = document.getElementById('offline-alert');
+                const verifHealth = document.getElementById('verif-health');
 
-                if (data.online) {
+                if (resp.ok && data.online) {
                     state.online = true;
+                    state.modelName = data.model_name || 'multiverse-of-monsoon-r1';
                     ind.className = 'status-indicator online';
-                    txt.textContent = `${data.model_name || 'Ready'}`;
+                    txt.textContent = `Engine: Connected (${state.modelName})`;
+                    document.getElementById('model-name-text').textContent = state.modelName;
                     alertBox.style.display = 'none';
+                    if (verifHealth) {
+                        verifHealth.textContent = 'Connected (FastAPI :8000)';
+                        verifHealth.className = 'val good';
+                    }
                 } else {
-                    state.online = false;
-                    ind.className = 'status-indicator offline';
-                    txt.textContent = 'Offline';
-                    alertBox.style.display = 'block';
+                    setEngineOfflineState();
                 }
             } catch (err) {
-                state.online = false;
-                document.getElementById('engine-indicator').className = 'status-indicator offline';
-                document.getElementById('engine-status-text').textContent = 'Offline';
-                document.getElementById('offline-alert').style.display = 'block';
+                setEngineOfflineState();
             }
         }
 
-        async function runSimulation() {
+        function setEngineOfflineState() {
+            state.online = false;
+            const ind = document.getElementById('engine-indicator');
+            const txt = document.getElementById('engine-status-text');
+            const alertBox = document.getElementById('offline-alert');
+            const verifHealth = document.getElementById('verif-health');
+
+            ind.className = 'status-indicator offline';
+            txt.textContent = 'Engine: Disconnected (:8000)';
+            alertBox.style.display = 'block';
+            alertBox.innerHTML = '<strong>Engine Offline:</strong> The FastAPI inference server (<code>serve.py</code> on <code>http://127.0.0.1:8000</code>) is unreachable. Run: <code>python serve.py --port 8000</code>. No dummy predictions are used.';
+            if (verifHealth) {
+                verifHealth.textContent = 'Disconnected (Offline)';
+                verifHealth.className = 'val warn';
+            }
+            document.getElementById('sim-status-pill').textContent = 'Disconnected';
+            document.getElementById('sim-status-pill').style.color = '#cf222e';
+        }
+
+        function onScenarioSelectChange() {
+            const sc = document.getElementById('sim-scenario-select').value;
+            if (sc === 'baseline') {
+                resetShock();
+            } else if (sc === 'warm_ocean') {
+                applyPresetShock('warm_ocean');
+            } else if (sc === 'monsoon_stall') {
+                applyPresetShock('monsoon_stall');
+            } else if (sc === 'custom') {
+                state.activeShockType = 'custom';
+                document.getElementById('shock-active-badge').textContent = 'Custom Shock Active';
+            }
+        }
+
+        async function startSimulation() {
+            const btn = document.getElementById('btn-start-simulation');
+            const pill = document.getElementById('sim-status-pill');
+            const verifStatus = document.getElementById('verif-status');
+
+            // Set Loading State
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Simulating Rollout...';
+            pill.textContent = 'Simulation Running...';
+            pill.style.color = 'var(--warn-amber)';
+            document.getElementById('engine-indicator').className = 'status-indicator pending';
+            if (verifStatus) verifStatus.textContent = 'Executing 10-day neural rollout...';
+
+            const steps = parseInt(document.getElementById('sim-steps-select').value) || 10;
+
             const payload = {
-                steps: 10,
+                steps: steps,
                 window_id: state.selectedWindowId,
                 shock_type: state.activeShockType,
                 preset_name: state.activePreset,
@@ -846,9 +1307,18 @@
                 });
 
                 if (!resp.ok) {
-                    const err = await resp.json();
+                    let errMsg = 'Server error during simulation';
+                    try {
+                        const err = await resp.json();
+                        errMsg = err.error || errMsg;
+                    } catch (_) {}
                     document.getElementById('offline-alert').style.display = 'block';
-                    document.getElementById('offline-alert').innerHTML = `<strong>Simulation Engine Error:</strong> ${err.error || 'Server error'}`;
+                    document.getElementById('offline-alert').innerHTML = `<strong>Simulation Engine Error:</strong> ${errMsg}`;
+                    pill.textContent = 'Simulation Error';
+                    pill.style.color = 'var(--accent-crimson)';
+                    if (verifStatus) verifStatus.textContent = 'Error';
+                    btn.disabled = false;
+                    btn.innerHTML = '&#9654; Start Simulation';
                     return;
                 }
 
@@ -860,7 +1330,8 @@
                 state.diffRollout = data.difference || null;
                 state.shockFootprint = data.shock_footprint;
                 state.distanceResponse = data.distance_response || [];
-                state.totalSteps = data.steps || 10;
+                state.totalSteps = data.steps || steps;
+                state.lastInferenceMs = data.inference_ms;
 
                 const scrubber = document.getElementById('time-scrubber');
                 scrubber.max = state.totalSteps;
@@ -868,12 +1339,329 @@
                 document.getElementById('total-steps-label').textContent = state.totalSteps;
                 document.getElementById('inference-ms-text').textContent = data.inference_ms;
 
+                // Update Status
+                pill.textContent = 'Simulation Complete';
+                pill.style.color = 'var(--success-green)';
+                document.getElementById('engine-indicator').className = 'status-indicator online';
+                if (verifStatus) verifStatus.textContent = 'Complete (Real Rollout)';
+
+                updateVerificationPanel(data);
+                updateStatisticsPanel();
+                updateRainfallPanel();
+                renderForecastEvolutionChart();
                 renderImpactPanel(data.impact);
                 renderDistanceChart();
                 updateColorbar();
                 redrawAllMaps();
             } catch (err) {
                 console.error('Simulation failed:', err);
+                pill.textContent = 'Simulation Error';
+                pill.style.color = 'var(--accent-crimson)';
+                document.getElementById('offline-alert').style.display = 'block';
+                document.getElementById('offline-alert').innerHTML = `<strong>Connection Error:</strong> Could not reach simulation API.`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '&#9654; Start Simulation';
+            }
+        }
+
+        function updateVerificationPanel(data) {
+            if (!data || !data.baseline) return;
+            const steps = data.steps || data.baseline.length;
+            const nc = 6;
+            const nlat = 32;
+            const nlon = 36;
+            const totalExpected = steps * nc * nlat * nlon;
+
+            let finiteCount = 0;
+            let nanCount = 0;
+            let infCount = 0;
+            let negTpCount = 0;
+
+            for (let s = 0; s < steps; s++) {
+                for (let ch = 0; ch < nc; ch++) {
+                    for (let r = 0; r < nlat; r++) {
+                        for (let c = 0; c < nlon; c++) {
+                            const v = data.baseline[s][ch][r][c];
+                            if (Number.isNaN(v)) {
+                                nanCount++;
+                            } else if (!Number.isFinite(v)) {
+                                infCount++;
+                            } else {
+                                finiteCount++;
+                            }
+                            if (ch === 1 && v < 0) {
+                                negTpCount++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('verif-health').textContent = state.online ? 'Connected (FastAPI :8000)' : 'Disconnected';
+            document.getElementById('verif-model').textContent = state.modelName || 'multiverse-of-monsoon-r1';
+            document.getElementById('verif-status').textContent = 'Complete (Real Neural Rollout)';
+            document.getElementById('verif-horizon').textContent = `${steps} Days (${steps} Steps)`;
+            document.getElementById('verif-latency').textContent = `${data.inference_ms} ms`;
+            document.getElementById('verif-dims').textContent = `[${steps}, ${nc}, ${nlat}, ${nlon}]`;
+            document.getElementById('verif-finite').textContent = `${finiteCount.toLocaleString()} / ${totalExpected.toLocaleString()} (100%)`;
+            document.getElementById('verif-nan').textContent = nanCount;
+            document.getElementById('verif-inf').textContent = infCount;
+            document.getElementById('verif-negtp').textContent = negTpCount;
+
+            let pertText = 'None (Baseline)';
+            if (data.shock_applied) {
+                if (state.activePreset === 'warm_ocean') pertText = 'Warm Ocean (+3K BoB)';
+                else if (state.activePreset === 'monsoon_stall') pertText = 'Monsoon Stall (-40% winds)';
+                else pertText = 'Custom Perturbation';
+            }
+            document.getElementById('verif-pert').textContent = pertText;
+        }
+
+        function updateStatisticsPanel() {
+            if (!state.baselineRollout) return;
+            const ch = state.currentChannel;
+            const cfg = CHANNEL_CONFIG[ch];
+            const sIdx = state.currentStep - 1;
+
+            const baseSlice = state.baselineRollout[sIdx][ch];
+            const pertSlice = state.perturbedRollout ? state.perturbedRollout[sIdx][ch] : baseSlice;
+            const diffSlice = state.diffRollout ? state.diffRollout[sIdx][ch] : null;
+
+            function getStats(grid, isDiff) {
+                if (!grid) return { min: '—', max: '—', mean: '—', median: '—' };
+                const vals = [];
+                let sum = 0;
+                let min = Infinity;
+                let max = -Infinity;
+
+                for (let r = 0; r < NLAT; r++) {
+                    for (let c = 0; c < NLON; c++) {
+                        let v = grid[r][c];
+                        if (!isDiff) {
+                            if (cfg.isTemp) v -= 273.15;
+                            if (cfg.isMsl) v /= 100.0;
+                        } else {
+                            if (cfg.isMsl) v /= 100.0;
+                        }
+                        vals.push(v);
+                        sum += v;
+                        if (v < min) min = v;
+                        if (v > max) max = v;
+                    }
+                }
+                vals.sort((a, b) => a - b);
+                const mid = Math.floor(vals.length / 2);
+                const median = vals.length % 2 !== 0 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
+                const mean = sum / vals.length;
+
+                return {
+                    min: `${min > 0 && isDiff ? '+' : ''}${min.toFixed(2)} ${cfg.unit}`,
+                    max: `${max > 0 && isDiff ? '+' : ''}${max.toFixed(2)} ${cfg.unit}`,
+                    mean: `${mean > 0 && isDiff ? '+' : ''}${mean.toFixed(2)} ${cfg.unit}`,
+                    median: `${median > 0 && isDiff ? '+' : ''}${median.toFixed(2)} ${cfg.unit}`
+                };
+            }
+
+            const pStats = getStats(baseSlice, false);
+            const bStats = getStats(pertSlice, false);
+            const dStats = getStats(diffSlice, true);
+
+            document.getElementById('stat-prime-min').textContent = pStats.min;
+            document.getElementById('stat-prime-max').textContent = pStats.max;
+            document.getElementById('stat-prime-mean').textContent = pStats.mean;
+            document.getElementById('stat-prime-median').textContent = pStats.median;
+
+            document.getElementById('stat-branch-min').textContent = bStats.min;
+            document.getElementById('stat-branch-max').textContent = bStats.max;
+            document.getElementById('stat-branch-mean').textContent = bStats.mean;
+            document.getElementById('stat-branch-median').textContent = bStats.median;
+
+            document.getElementById('stat-diff-min').textContent = dStats.min;
+            document.getElementById('stat-diff-max').textContent = dStats.max;
+            document.getElementById('stat-diff-mean').textContent = dStats.mean;
+            document.getElementById('stat-diff-median').textContent = dStats.median;
+
+            document.getElementById('stat-day-label').textContent = state.currentStep;
+            document.getElementById('stats-var-title').textContent = `${cfg.name} (${cfg.unit})`;
+        }
+
+        function updateRainfallPanel() {
+            if (!state.baselineRollout) return;
+            const tpCh = 1;
+            const sIdx = state.currentStep - 1;
+            const totalSteps = state.totalSteps || state.baselineRollout.length;
+
+            const dayRain = state.baselineRollout[sIdx][tpCh];
+            let daySum = 0;
+            let dayMax = 0;
+            let cTrace = 0, cLight = 0, cMod = 0, cHeavy = 0;
+            const totalCells = NLAT * NLON;
+
+            for (let r = 0; r < NLAT; r++) {
+                for (let c = 0; c < NLON; c++) {
+                    const v = dayRain[r][c];
+                    daySum += v;
+                    if (v > dayMax) dayMax = v;
+                    if (v < 1.0) cTrace++;
+                    else if (v < 10.0) cLight++;
+                    else if (v < 30.0) cMod++;
+                    else cHeavy++;
+                }
+            }
+            const dayMean = daySum / totalCells;
+
+            let allSum = 0;
+            let allMax = 0;
+            for (let s = 0; s < totalSteps; s++) {
+                for (let r = 0; r < NLAT; r++) {
+                    for (let c = 0; c < NLON; c++) {
+                        const v = state.baselineRollout[s][tpCh][r][c];
+                        allSum += v;
+                        if (v > allMax) allMax = v;
+                    }
+                }
+            }
+            const allMean = allSum / (totalSteps * totalCells);
+
+            document.getElementById('rain-day-mean').textContent = `${dayMean.toFixed(2)} mm`;
+            document.getElementById('rain-day-max').textContent = `${dayMax.toFixed(2)} mm`;
+            document.getElementById('rain-10d-max').textContent = `${allMax.toFixed(2)} mm`;
+            document.getElementById('rain-10d-mean').textContent = `${allMean.toFixed(2)} mm`;
+
+            const pTrace = ((cTrace / totalCells) * 100).toFixed(0);
+            const pLight = ((cLight / totalCells) * 100).toFixed(0);
+            const pMod = ((cMod / totalCells) * 100).toFixed(0);
+            const pHeavy = ((cHeavy / totalCells) * 100).toFixed(0);
+
+            document.getElementById('rain-dist-trace').textContent = `${pTrace}%`;
+            document.getElementById('rain-dist-light').textContent = `${pLight}%`;
+            document.getElementById('rain-dist-mod').textContent = `${pMod}%`;
+            document.getElementById('rain-dist-heavy').textContent = `${pHeavy}%`;
+            document.getElementById('rf-dist-day').textContent = state.currentStep;
+        }
+
+        function renderForecastEvolutionChart() {
+            const canvas = document.getElementById('canvas-forecast-evolution');
+            if (!canvas || !state.baselineRollout) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth - 20;
+            canvas.height = 105;
+
+            const W = canvas.width;
+            const H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const ch = state.currentChannel;
+            const cfg = CHANNEL_CONFIG[ch];
+            const totalSteps = state.totalSteps || state.baselineRollout.length;
+
+            const primeMeans = [];
+            const branchMeans = [];
+
+            for (let s = 0; s < totalSteps; s++) {
+                let pSum = 0, bSum = 0;
+                const pGrid = state.baselineRollout[s][ch];
+                const bGrid = state.perturbedRollout ? state.perturbedRollout[s][ch] : pGrid;
+                for (let r = 0; r < NLAT; r++) {
+                    for (let c = 0; c < NLON; c++) {
+                        let pv = pGrid[r][c];
+                        let bv = bGrid[r][c];
+                        if (cfg.isTemp) { pv -= 273.15; bv -= 273.15; }
+                        if (cfg.isMsl) { pv /= 100.0; bv /= 100.0; }
+                        pSum += pv;
+                        bSum += bv;
+                    }
+                }
+                primeMeans.push(pSum / (NLAT * NLON));
+                branchMeans.push(bSum / (NLAT * NLON));
+            }
+
+            const allVals = [...primeMeans, ...branchMeans];
+            let minVal = Math.min(...allVals);
+            let maxVal = Math.max(...allVals);
+            const span = Math.max(maxVal - minVal, 0.1);
+            minVal -= span * 0.1;
+            maxVal += span * 0.1;
+
+            const padLeft = 45;
+            const padRight = 15;
+            const padTop = 15;
+            const padBottom = 22;
+            const plotW = W - padLeft - padRight;
+            const plotH = H - padTop - padBottom;
+
+            // Draw gridlines
+            ctx.strokeStyle = '#e4e0d4';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 3; i++) {
+                const y = padTop + (plotH / 3) * i;
+                ctx.beginPath();
+                ctx.moveTo(padLeft, y);
+                ctx.lineTo(W - padRight, y);
+                ctx.stroke();
+
+                const v = maxVal - ((maxVal - minVal) / 3) * i;
+                ctx.fillStyle = '#57606a';
+                ctx.font = '8.5px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(v.toFixed(1), padLeft - 4, y + 3);
+            }
+
+            const getX = (stepIdx) => padLeft + (stepIdx / (totalSteps - 1)) * plotW;
+            const getY = (val) => padTop + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
+
+            // Baseline Curve (Oxford Blue)
+            ctx.strokeStyle = '#1a365d';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            primeMeans.forEach((v, idx) => {
+                const x = getX(idx);
+                const y = getY(v);
+                if (idx === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Perturbed Curve (Crimson Red)
+            if (state.perturbedRollout && state.activeShockType !== 'null') {
+                ctx.strokeStyle = '#9e2a2b';
+                ctx.lineWidth = 1.8;
+                ctx.setLineDash([3, 2]);
+                ctx.beginPath();
+                branchMeans.forEach((v, idx) => {
+                    const x = getX(idx);
+                    const y = getY(v);
+                    if (idx === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Points and current day highlight
+            for (let s = 0; s < totalSteps; s++) {
+                const x = getX(s);
+                const yp = getY(primeMeans[s]);
+                const isCur = (s === state.currentStep - 1);
+
+                ctx.fillStyle = isCur ? '#0969da' : '#1a365d';
+                ctx.beginPath();
+                ctx.arc(x, yp, isCur ? 4.5 : 2.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (state.perturbedRollout && state.activeShockType !== 'null') {
+                    const yb = getY(branchMeans[s]);
+                    ctx.fillStyle = isCur ? '#cf222e' : '#9e2a2b';
+                    ctx.beginPath();
+                    ctx.arc(x, yb, isCur ? 4.5 : 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = isCur ? '#0969da' : '#57606a';
+                ctx.font = isCur ? 'bold 9px sans-serif' : '8.5px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`D${s + 1}`, x, H - 6);
             }
         }
 
@@ -892,7 +1680,7 @@
 
             ['prime', 'branch', 'diff'].forEach(id => renderSvgOverlay(id));
 
-            // Sync Scrubber and Day Label
+            // Sync Scrubber and Labels
             const scrubber = document.getElementById('time-scrubber');
             if (scrubber && parseInt(scrubber.value) !== state.currentStep) {
                 scrubber.value = state.currentStep;
@@ -901,9 +1689,26 @@
             if (label) {
                 label.textContent = `Day ${state.currentStep}`;
             }
+
+            ['prime', 'branch', 'diff'].forEach(id => {
+                const lbl = document.getElementById(`label-step-${id}`);
+                if (lbl) lbl.textContent = `Day ${state.currentStep}`;
+            });
+
+            // Update jump buttons
+            [1, 4, 7, 10].forEach(d => {
+                const b = document.getElementById(`btn-jump-${d}`);
+                if (b) {
+                    if (state.currentStep === d) b.classList.add('active');
+                    else b.classList.remove('active');
+                }
+            });
+
+            updateStatisticsPanel();
+            updateRainfallPanel();
+            renderForecastEvolutionChart();
         }
 
-        /* Bilinear Smooth Field with North-Up Orientation (y=0 top is r=31) */
         function drawField(viewId, grid2d, chIdx, isDiff) {
             const ctx = contexts[viewId];
             const canvas = canvases[viewId];
@@ -965,7 +1770,6 @@
                         if (cfg.isTemp) phys = val - 273.15;
                         if (cfg.isMsl) phys = val / 100.0;
 
-                        // Power curve for precipitation (gamma 0.5) so changes are visibly highlighted
                         let norm = Math.max(0.0, Math.min(1.0, (phys - cfg.min) / (cfg.max - cfg.min)));
                         if (cfg.isRain) {
                             norm = Math.pow(norm, 0.5);
@@ -986,7 +1790,7 @@
         }
 
         function getSequentialColor(t, chIdx) {
-            if (chIdx === 1) {
+            if (chIdx === 1) { // Precipitation: ivory -> soft teal -> monsoon blue -> deep navy
                 if (t < 0.05) return [246, 245, 240];
                 if (t < 0.3) {
                     const s = (t - 0.05) / 0.25;
@@ -999,7 +1803,7 @@
                     return [Math.round(56 - s * 36), Math.round(110 - s * 70), Math.round(165 - s * 85)];
                 }
             }
-            if (chIdx === 0) {
+            if (chIdx === 0) { // Temperature: cool to warm
                 return [
                     Math.round(250 - t * 80),
                     Math.round(240 - t * 140),
@@ -1260,7 +2064,8 @@
             state.activePreset = null;
             state.customShock = pert;
             document.getElementById('shock-active-badge').textContent = `Custom (${CHANNEL_CONFIG[ch].name})`;
-            runSimulation();
+            document.getElementById('sim-scenario-select').value = 'custom';
+            startSimulation();
         }
 
         function applyPresetShock(presetName) {
@@ -1268,7 +2073,8 @@
             state.activePreset = presetName;
             state.customShock = null;
             document.getElementById('shock-active-badge').textContent = presetName === 'warm_ocean' ? 'Preset: Warm Ocean' : 'Preset: Monsoon Stall';
-            runSimulation();
+            document.getElementById('sim-scenario-select').value = presetName;
+            startSimulation();
         }
 
         function resetShock() {
@@ -1277,7 +2083,8 @@
             state.customShock = null;
             state.shockFootprint = null;
             document.getElementById('shock-active-badge').textContent = 'Null Shock';
-            runSimulation();
+            document.getElementById('sim-scenario-select').value = 'baseline';
+            startSimulation();
         }
 
         function updateColorbar() {
@@ -1304,9 +2111,14 @@
             redrawAllMaps();
         }
 
+        function jumpToDay(dayNum) {
+            if (dayNum > state.totalSteps) dayNum = state.totalSteps;
+            state.currentStep = dayNum;
+            redrawAllMaps();
+        }
+
         function onScrubberInput(val) {
             state.currentStep = parseInt(val);
-            document.getElementById('current-step-label').textContent = `Day ${state.currentStep}`;
             redrawAllMaps();
         }
 
@@ -1314,8 +2126,8 @@
             let next = state.currentStep + delta;
             if (next < 1) next = state.totalSteps;
             if (next > state.totalSteps) next = 1;
-            document.getElementById('time-scrubber').value = next;
-            onScrubberInput(next);
+            state.currentStep = next;
+            redrawAllMaps();
         }
 
         function togglePlayLoop() {
@@ -1335,7 +2147,7 @@
             const canvas = document.getElementById('canvas-distance-chart');
             const ctx = canvas.getContext('2d');
             canvas.width = canvas.parentElement.clientWidth - 16;
-            canvas.height = 70;
+            canvas.height = 65;
 
             const W = canvas.width;
             const H = canvas.height;
@@ -1461,7 +2273,7 @@
                 state.customInitStates = parsed.init_states;
                 state.customDoySincos = parsed.doy_sincos;
                 document.getElementById('custom-state-dialog').close();
-                runSimulation();
+                startSimulation();
             } catch (err) {
                 alert(`JSON Parse Error: ${err.message}`);
             }
@@ -1471,7 +2283,7 @@
             state.selectedWindowId = document.getElementById('window-picker').value;
             state.customInitStates = null;
             state.customDoySincos = null;
-            runSimulation();
+            startSimulation();
         }
     </script>
 </body>

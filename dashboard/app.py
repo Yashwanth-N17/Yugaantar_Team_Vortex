@@ -91,19 +91,7 @@ def get_window_data(window_id_or_idx: Any) -> Tuple[np.ndarray, List[float], str
         date_str = selected.get("date", "bundled_window")
         return states, doy, date_str
 
-    # Synthetic fallback baseline (mid-monsoon)
-    base = np.array([300.5, 6.0, 4.0, 2.5, 100800.0, 42.0], "f4")[:, None, None]
-    states = np.repeat(base[None, ...], T_IN, axis=0)
-    return states, doy_sincos(200), "baseline_mid_monsoon"
-
-
-def is_port_open(host: str, port: int, timeout: float = 0.2) -> bool:
-    """Non-blocking socket check for localhost service."""
-    try:
-        with socket.create_connection((host, port), timeout=timeout):
-            return True
-    except (socket.timeout, ConnectionRefusedError, OSError):
-        return False
+    raise ValueError(f"Bundled window '{window_id_or_idx}' not found and no valid initial state available.")
 
 
 def call_engine_simulate(
@@ -112,7 +100,7 @@ def call_engine_simulate(
     steps: int,
     pert: Optional[np.ndarray] = None,
 ) -> Tuple[np.ndarray, float, bool]:
-    """Call the offline inference engine /simulate endpoint with strict error handling."""
+    """Call the offline inference engine serve.py /simulate endpoint with strict error handling."""
     payload = {
         "init_states": init_states.tolist(),
         "doy_sincos": doy,
@@ -120,25 +108,16 @@ def call_engine_simulate(
         "perturbation": pert.tolist() if pert is not None else None,
     }
 
-    if is_port_open("127.0.0.1", 8000, timeout=0.15):
-        try:
-            resp = requests.post(f"{SERVE_URL}/simulate", json=payload, timeout=6.0)
-            if resp.status_code == 200:
-                res = resp.json()
-                return np.array(res["rollout"], dtype="f4"), float(res.get("inference_ms", 120.0)), True
-        except Exception as e:
-            print(f"[Dashboard] Engine call to {SERVE_URL}/simulate failed: {e}")
-
-    # Seamless in-process execution using weights.pt
     try:
-        import time
-        from serve import simulate
-        t0 = time.perf_counter()
-        out = simulate(init_states, doy, steps, pert)
-        lat_ms = (time.perf_counter() - t0) * 1000.0
-        return out, lat_ms, True
+        resp = requests.post(f"{SERVE_URL}/simulate", json=payload, timeout=15.0)
+        if resp.status_code == 200:
+            res = resp.json()
+            return np.array(res["rollout"], dtype="f4"), float(res.get("inference_ms", 0.0)), True
+        else:
+            print(f"[Dashboard] Engine error {resp.status_code}: {resp.text}")
+            return np.empty((0,), dtype="f4"), 0.0, False
     except Exception as e:
-        print(f"[Dashboard] In-process simulation fallback failed: {e}")
+        print(f"[Dashboard] Engine call to {SERVE_URL}/simulate failed: {e}")
         return np.empty((0,), dtype="f4"), 0.0, False
 
 
@@ -153,37 +132,26 @@ def index():
 @app.post("/api/health")
 def api_health():
     """Poll the real underlying inference engine /health endpoint."""
-    if is_port_open("127.0.0.1", 8000, timeout=0.15):
-        try:
-            resp = requests.get(f"{SERVE_URL}/health", timeout=1.0)
-            if resp.status_code == 200:
-                data = resp.json()
-                return JSONResponse({
-                    "online": True,
-                    "engine_status": data.get("status", "ready"),
-                    "model_name": data.get("model_name", "multiverse-of-monsoon-r1"),
-                    "serve_url": SERVE_URL,
-                })
-        except Exception:
-            pass
-
-    # When serve.py port 8000 is not running, check in-process model readiness
-    weights_file = ROOT_DIR / "weights.pt"
-    if weights_file.exists():
-        return JSONResponse({
-            "online": True,
-            "engine_status": "ready (in-process engine)",
-            "model_name": "multiverse-of-monsoon-r1",
-            "serve_url": SERVE_URL,
-        })
+    try:
+        resp = requests.get(f"{SERVE_URL}/health", timeout=1.5)
+        if resp.status_code == 200:
+            data = resp.json()
+            return JSONResponse({
+                "online": True,
+                "engine_status": data.get("status", "ready"),
+                "model_name": data.get("model_name", "multiverse-of-monsoon-r1"),
+                "serve_url": SERVE_URL,
+            })
+    except Exception:
+        pass
 
     return JSONResponse({
         "online": False,
         "engine_status": "offline",
         "model_name": None,
         "serve_url": SERVE_URL,
-        "error": "Inference engine serve.py (port 8000) is unreachable."
-    })
+        "error": "FastAPI inference engine serve.py (port 8000) is offline/unreachable."
+    }, status_code=503)
 
 
 @app.get("/api/windows")
@@ -273,7 +241,10 @@ async def api_simulate(request: Request):
             perturbed_rollout = p_rollout
             lat_ms = round(b_lat + p_lat, 2)
         else:
-            perturbed_rollout = baseline_rollout.copy()
+            return JSONResponse({
+                "error": "Failed to run perturbed simulation on inference engine (port 8000).",
+                "online": False,
+            }, status_code=500)
 
     # Differential rollout: never offset deltas by K or Pa; direct difference
     diff_rollout = None

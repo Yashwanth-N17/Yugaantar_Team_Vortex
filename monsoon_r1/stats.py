@@ -35,9 +35,17 @@ def channel_stats(data: np.ndarray) -> dict:
             "std": [float(x) for x in data.std(axis=(0, 2, 3))]}
 
 
-def build_artifacts(train_npz: Path, out_dir: Path) -> dict:
+def compute_training_stats(data: np.ndarray, dates: np.ndarray, train_end_year: int = 2018) -> dict:
+    """Compute channel statistics strictly from the training period (<= train_end_year)."""
+    years = np.array([int(x) // 10000 for x in dates])
+    mask = years <= train_end_year
+    return channel_stats(data[mask])
+
+
+def build_artifacts(train_npz: Path, out_dir: Path, train_end_year: int = 2018) -> dict:
     z = np.load(train_npz); data, dates = z["data"], z["dates"]
     out_dir.mkdir(parents=True, exist_ok=True)
     clim = climatology(data, dates); np.save(out_dir / "climatology.npy", clim)
-    st = channel_stats(data); (out_dir / "stats.json").write_text(json.dumps(st, indent=1))
+    st = compute_training_stats(data, dates, train_end_year=train_end_year)
+    (out_dir / "stats.json").write_text(json.dumps(st, indent=1))
     return st

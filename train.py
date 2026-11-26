@@ -61,6 +61,12 @@ def main() -> int:
         default="static.pt",
         help="Output path for extracted static geography tensor",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for reproducibility",
+    )
     args = parser.parse_args()
 
     train_model(
@@ -71,6 +77,7 @@ def main() -> int:
         lr=args.lr,
         output_weights=args.out,
         output_static=args.static_pt,
+        seed=args.seed,
     )
     return 0
 
