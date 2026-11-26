@@ -20,3 +20,6 @@ packages = ["monsoon_r1"]
 
 [tool.setuptools.package-data]
 monsoon_r1 = ["template/serve.py"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
