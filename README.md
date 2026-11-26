@@ -29,7 +29,7 @@ The **Multiverse of Monsoon Climate Digital Twin** answers:
 
 ## 2. Six-Block Physics-Aware Architecture
 
-The engine is engineered as a sequential, modular 6-block spatiotemporal deep learning pipeline operating on an Indian domain grid of $32 \times 36$ ($1^\circ$ resolution, $8^\circ\text{N}–39^\circ\text{N}, 68^\circ\text{E}–103^\circ\text{E}$):
+The engine is engineered as a sequential, modular 6-block spatiotemporal deep learning pipeline operating on an Indian domain grid of $32 \times 36$ ($1^\circ$ resolution, centres $6.5^\circ\text{N}–37.5^\circ\text{N}, 65.5^\circ\text{E}–100.5^\circ\text{E}$):
 
 ```
 Climate Input [B, T=3, 6, 32, 36] + Geography [B, 2, 32, 36] + Calendar [B, 2]
@@ -80,7 +80,7 @@ Climate Input [B, T=3, 6, 32, 36] + Geography [B, 2, 32, 36] + Calendar [B, 2]
 ## 3. Dataset & Preprocessing
 
 The model is trained strictly using the provided Indian climate dataset:
-- **`hackdata/india_climate_train.nc`**: 122.8 MB NetCDF dataset containing 6,209 daily ERA5 observations (2005–2021).
+- **`hackdata/india_climate_train.nc`**: 122.8 MB NetCDF dataset containing 6,209 daily ERA5 observations (2005–2021). Available for download from the official team kit release: [yug-monsoon-kit Releases (v1.0.0)](https://github.com/OfficialAbhinavSingh/yug-monsoon-kit/releases/tag/v1.0.0) (`india_climate_train.nc`).
   - SHA-256 Checksum: `f37bdbd0bd44e6fe951adf36c9a08620075f9d17de391b04c97d61f06797903b` (verified).
 - **Channels (in exact order):**
   1. `t2m`: 2-meter air temperature (Kelvin)

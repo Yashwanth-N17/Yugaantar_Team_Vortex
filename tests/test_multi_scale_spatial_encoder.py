@@ -17,7 +17,10 @@ from __future__ import annotations
 
 import math
 import unittest
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
 import torch
 
 from monsoon_r1.models.climate_input_encoder import ClimateInputEncoder

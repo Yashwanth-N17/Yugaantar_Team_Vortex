@@ -3,526 +3,1476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiverse of Monsoon — Climate Digital Twin & Impact Co-Pilot</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <title>India Synoptic Climate Twin</title>
     <style>
-        :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #131b2e;
-            --bg-card: #1c2640;
-            --border: #2a3759;
-            --accent-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
-            --accent-purple: #8b5cf6;
-            --accent-orange: #f97316;
-            --accent-red: #ef4444;
-            --accent-green: #10b981;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+        @font-face {
+            font-family: 'Source Serif';
+            src: url('/static/fonts/source-serif-4.woff2') format('woff2');
+            font-weight: 400 700;
+            font-display: swap;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @font-face {
+            font-family: 'Fira Sans';
+            src: url('/static/fonts/fira-sans.woff2') format('woff2');
+            font-weight: 400 600;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-paper: #f6f5f0;
+            --bg-canvas: #eceae1;
+            --bg-panel: #fcfbf7;
+            --text-main: #1f2328;
+            --text-muted: #57606a;
+            --border-hairline: #d0cbbd;
+            --border-subtle: #e4e0d4;
+            --accent-oxford: #1a365d;
+            --accent-crimson: #9e2a2b;
+            --warn-amber: #b45309;
+            --sea-color: #e5ecef;
+            --grid-line: rgba(31, 35, 40, 0.12);
+            --focus-ring: #0969da;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
+            font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: var(--bg-paper);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
         }
-        header {
-            background: linear-gradient(90deg, #131b2e 0%, #1e1b4b 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 32px;
+
+        a, button, input, select {
+            font-family: inherit;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        .num {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+        }
+
+        /* Top Bar */
+        header.instrument-header {
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-hairline);
+            padding: 8px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .header-brand {
+
+        .header-title-group h1 {
+            font-family: 'Source Serif', Georgia, serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--accent-oxford);
+            letter-spacing: -0.01em;
+        }
+
+        .header-status-group {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
+            font-size: 11.5px;
         }
-        .badge {
-            background: rgba(59, 130, 246, 0.2);
-            color: var(--accent-cyan);
-            border: 1px solid var(--accent-blue);
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 999px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+
+        .badge-system {
+            padding: 2px 7px;
+            border-radius: 2px;
+            border: 1px solid var(--border-hairline);
+            background-color: var(--bg-canvas);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .status-dot {
-            width: 8px;
-            height: 8px;
+
+        .status-indicator {
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            background-color: var(--accent-green);
             display: inline-block;
-            margin-right: 6px;
-            box-shadow: 0 0 8px var(--accent-green);
         }
-        main {
+        .status-indicator.online { background-color: #1a7f37; }
+        .status-indicator.offline { background-color: var(--accent-crimson); }
+        .status-indicator.pending { background-color: var(--warn-amber); }
+
+        /* Main Workspace: ~72% Map / 28% Control Rail */
+        .workspace {
             flex: 1;
             display: grid;
-            grid-template-columns: 360px 1fr 380px;
-            gap: 20px;
-            padding: 24px 32px;
+            grid-template-columns: minmax(0, 1fr) 350px;
+            gap: 0;
+            border-bottom: 1px solid var(--border-hairline);
+            min-height: 0;
+            height: calc(100vh - 43px - 45px);
+            overflow: hidden;
         }
-        .panel {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
+
+        @media (max-width: 1080px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+        }
+
+        /* Left: Map Section */
+        .map-section {
+            background-color: var(--bg-canvas);
+            padding: 12px 16px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
-        }
-        .panel-title {
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--accent-cyan);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 10px;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-        select, input, button {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-family: inherit;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-        select:focus, input:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-        button.btn-primary {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            border: none;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-        button.btn-primary:hover {
-            opacity: 0.95;
-            transform: translateY(-1px);
-        }
-        .map-container {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+            gap: 10px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-hairline);
             height: 100%;
         }
-        .canvas-wrapper {
-            flex: 1;
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 12px;
+
+        .map-toolbar {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            position: relative;
+            background-color: var(--bg-panel);
+            padding: 6px 12px;
+            border: 1px solid var(--border-hairline);
+            border-radius: 2px;
+            font-size: 11.5px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.04em;
+        }
+
+        select.instrument-select, input.instrument-input {
+            border: 1px solid var(--border-hairline);
+            background-color: #fff;
+            padding: 3px 6px;
+            font-size: 11.5px;
+            color: var(--text-main);
+            border-radius: 2px;
+        }
+
+        .maps-triptych {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        @media (max-width: 1250px) {
+            .maps-triptych {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .map-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-hairline);
+            border-radius: 2px;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-            min-height: 480px;
+            position: relative;
         }
-        canvas {
-            image-rendering: pixelated;
-            border-radius: 6px;
+
+        .map-card-header {
+            padding: 5px 8px;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-oxford);
         }
-        .map-overlay {
+
+        .map-viewport {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 36 / 32;
+            background-color: var(--sea-color);
+            cursor: crosshair;
+        }
+
+        .map-viewport canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay-layer {
             position: absolute;
-            top: 14px;
-            left: 14px;
-            background: rgba(19, 27, 46, 0.85);
-            backdrop-filter: blur(8px);
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-size: 12px;
+            inset: 0;
+            pointer-events: none;
         }
-        .timeline-bar {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 18px;
+
+        .hover-info-dock {
+            padding: 4px 8px;
+            border-top: 1px solid var(--border-subtle);
+            background-color: #fff;
+            font-size: 10.5px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+        }
+
+        .hover-info-dock strong {
+            color: var(--text-main);
+        }
+
+        /* Colorbar Dock */
+        .colorbar-container {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-hairline);
+            border-radius: 2px;
+            padding: 6px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .colorbar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9.5px;
+            color: var(--text-muted);
+        }
+
+        .colorbar-strip {
+            height: 8px;
+            width: 100%;
+            border-radius: 1px;
+            border: 1px solid rgba(0,0,0,0.12);
+        }
+
+        /* Right: Slim Control Rail */
+        .control-rail {
+            background-color: var(--bg-panel);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-left: 1px solid var(--border-hairline);
+            height: 100%;
+        }
+
+        .rail-section {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-hairline);
+        }
+
+        .rail-section-title {
+            font-family: 'Source Serif', Georgia, serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-oxford);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .field-group {
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .btn-instrument {
+            background-color: #fff;
+            border: 1px solid var(--border-hairline);
+            color: var(--text-main);
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: background 0.1s ease;
+        }
+
+        .btn-instrument:hover {
+            background-color: var(--bg-canvas);
+        }
+
+        .btn-instrument.primary {
+            background-color: var(--accent-oxford);
+            border-color: var(--accent-oxford);
+            color: #fff;
+        }
+
+        .btn-instrument.danger {
+            background-color: #fff;
+            color: var(--accent-crimson);
+            border-color: #d89e9e;
+        }
+        .btn-instrument.danger:hover {
+            background-color: #fee2e2;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        /* Distance Chart */
+        .chart-box {
+            background-color: #fff;
+            border: 1px solid var(--border-subtle);
+            padding: 6px 8px;
+            border-radius: 2px;
+            margin-top: 6px;
+        }
+
+        .chart-box canvas {
+            display: block;
+            width: 100%;
+            height: 75px;
+        }
+
+        /* Regional Impact Metrics Cards */
+        .region-card {
+            border: 1px solid var(--border-subtle);
+            background-color: #fff;
+            padding: 6px 8px;
+            border-radius: 2px;
+            margin-bottom: 6px;
+            font-size: 10.5px;
+        }
+
+        .region-header {
+            font-weight: 600;
+            color: var(--accent-oxford);
+            margin-bottom: 3px;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 2px;
+        }
+
+        .region-metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+        }
+
+        .metric-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-cell span.lbl {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        .metric-cell span.val {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .delta-tag {
+            font-size: 9.5px;
+            font-weight: 600;
+            margin-left: 2px;
+        }
+        .delta-tag.pos { color: #1a7f37; }
+        .delta-tag.neg { color: var(--accent-crimson); }
+        .delta-tag.zero { color: var(--text-muted); }
+
+        /* Advisories */
+        .advisory-box {
+            background-color: #fff;
+            border-left: 3px solid var(--warn-amber);
+            border-top: 1px solid var(--border-subtle);
+            border-right: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 6px 8px;
+            font-size: 10.5px;
+            margin-bottom: 5px;
+            line-height: 1.35;
+        }
+
+        /* Bottom Time Dock */
+        footer.time-dock {
+            background-color: var(--bg-panel);
+            border-top: 1px solid var(--border-hairline);
+            padding: 8px 20px;
             display: flex;
             align-items: center;
             gap: 16px;
+            height: 45px;
+            flex-shrink: 0;
+            z-index: 10;
         }
-        .timeline-bar input[type=range] {
+
+        .time-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .scrubber-container {
             flex: 1;
-            accent-color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 480px;
+        }
+
+        input[type="range"].scrubber {
+            flex: 1;
+            accent-color: var(--accent-oxford);
             cursor: pointer;
         }
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-        }
-        .stat-value {
-            font-size: 20px;
+
+        .step-display {
+            font-family: 'Source Serif', Georgia, serif;
+            font-size: 13px;
             font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--accent-cyan);
-            margin-top: 4px;
+            color: var(--accent-oxford);
+            min-width: 80px;
         }
-        .advisory-box {
-            background: rgba(249, 115, 22, 0.1);
-            border-left: 3px solid var(--accent-orange);
-            padding: 10px 12px;
-            border-radius: 0 6px 6px 0;
-            font-size: 12px;
-            line-height: 1.4;
-        }
-        .region-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 12px;
-        }
-        .legend-bar {
-            height: 10px;
-            border-radius: 5px;
-            margin: 6px 0;
+
+        .offline-banner {
+            display: none;
+            background-color: #ffebe9;
+            color: #cf222e;
+            border: 1px solid #ff8182;
+            padding: 8px 14px;
+            font-size: 11.5px;
+            margin: 10px 16px 0 16px;
+            border-radius: 2px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-brand">
-            <h2>🌌 Multiverse of Monsoon</h2>
-            <span class="badge">Earth-System Digital Twin</span>
+
+    <!-- Header -->
+    <header class="instrument-header">
+        <div class="header-title-group">
+            <h1>India Synoptic Climate Twin</h1>
         </div>
-        <div>
-            <span class="status-dot"></span>
-            <span style="font-size: 13px; color: var(--text-secondary);">Inference Engine: <strong style="color:white;">http://localhost:8000</strong> (Ready)</span>
+        <div class="header-status-group">
+            <div class="badge-system">
+                <span id="engine-indicator" class="status-indicator pending"></span>
+                <span>Engine: <strong id="engine-status-text">Polling...</strong></span>
+            </div>
+            <div class="badge-system">
+                <span>Inference: <strong class="num" id="inference-ms-text">&mdash;</strong> ms</span>
+            </div>
         </div>
     </header>
 
-    <main>
-        <!-- Left Panel: Controls & Multiverse Shock Injector -->
-        <div class="panel">
-            <div class="panel-title">🎮 Simulation Controller</div>
+    <!-- Offline Notification -->
+    <div id="offline-alert" class="offline-banner">
+        <strong>Engine Offline:</strong> The backend inference engine (<code>serve.py</code> on <code>0.0.0.0:8000</code>) is unreachable. No placeholder data is displayed.
+    </div>
 
-            <div class="control-group">
-                <label>Climate Variable</label>
-                <select id="channelSelect" onchange="updateVisualization()">
-                    <option value="0">t2m — 2-Meter Temperature (°C)</option>
-                    <option value="1" selected>tp — Total Precipitation (mm/day)</option>
-                    <option value="2">u10 — 10m Zonal Wind (m/s)</option>
-                    <option value="3">v10 — 10m Meridional Wind (m/s)</option>
-                    <option value="4">msl — Mean Sea Level Pressure (hPa)</option>
-                    <option value="5">tcwv — Total Column Water Vapor (kg/m²)</option>
-                </select>
-            </div>
+    <!-- Main Workspace -->
+    <div class="workspace">
 
-            <div class="control-group">
-                <label>Simulation Mode</label>
-                <select id="simMode" onchange="runSimulation()">
-                    <option value="prime">Timeline Prime (Baseline Rollout)</option>
-                    <option value="shock_bob">Multiverse: Hot Bay of Bengal (+3.0°C)</option>
-                    <option value="shock_wind">Multiverse: Weak Arabian Sea Wind (-5 m/s)</option>
-                    <option value="shock_heatwave">Multiverse: Pre-Monsoon Heatwave (+4.0°C)</option>
-                    <option value="diff">Difference View (Branch vs Prime)</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label>Forecast Horizon</label>
-                <select id="stepSelect">
-                    <option value="10">10 Days (Official Grader Horizon)</option>
-                    <option value="5">5 Days (Short-Range)</option>
-                    <option value="14">14 Days (Extended Rollout)</option>
-                </select>
-            </div>
-
-            <button class="btn-primary" onclick="runSimulation()">⚡ Trigger Live Simulation</button>
-
-            <div class="stat-card">
-                <label>Engine Latency</label>
-                <div class="stat-value" id="latencyStat">142 ms</div>
-                <div style="font-size: 11px; color: var(--text-secondary); margin-top:2px;">Target < 5,000 ms (CPU Limit)</div>
-            </div>
-
-            <div class="stat-card">
-                <label>Grid Resolution</label>
-                <div style="font-size: 13px; font-weight:600; margin-top:4px;">32 × 36 (1° Lat/Lon Indian Domain)</div>
-                <div style="font-size: 11px; color: var(--text-secondary); margin-top:2px;">8°N–39°N, 68°E–103°E</div>
-            </div>
-        </div>
-
-        <!-- Center: Interactive Heatmap Visualization -->
-        <div class="map-container">
-            <div class="canvas-wrapper">
-                <canvas id="climateMap" width="540" height="480"></canvas>
-                <div class="map-overlay">
-                    <div id="overlayTitle" style="font-weight:700; color:var(--accent-cyan);">Total Precipitation (Day 1)</div>
-                    <div id="overlayStats" style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Min: 0.0 mm | Max: 42.5 mm | Mean: 6.8 mm</div>
+        <!-- Left: Map Section -->
+        <main class="map-section">
+            <div class="map-toolbar">
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Variable:</span>
+                    <select id="channel-picker" class="instrument-select" onchange="onChannelChange()">
+                        <option value="1">Precipitation (tp, mm/day)</option>
+                        <option value="0">2m Temperature (t2m, &deg;C)</option>
+                        <option value="2">10m Eastward Wind (u10, m/s)</option>
+                        <option value="3">10m Northward Wind (v10, m/s)</option>
+                        <option value="4">Mean Sea Level Pressure (msl, hPa)</option>
+                        <option value="5">Total Column Water Vapour (tcwv, kg/m&sup2;)</option>
+                    </select>
+                </div>
+                <div class="toolbar-group">
+                    <span style="font-size:10.5px; color:var(--text-muted);">6.5&ndash;37.5&deg;N, 65.5&ndash;100.5&deg;E</span>
                 </div>
             </div>
 
-            <div class="timeline-bar">
-                <label style="min-width: 90px;"><strong id="dayLabel">Day 1</strong> of 10</label>
-                <input type="range" id="daySlider" min="0" max="9" value="0" oninput="onDaySliderChange(this.value)">
-                <button style="padding: 6px 12px; font-size:12px;" onclick="togglePlay()"><span id="playIcon">▶ Play</span></button>
-            </div>
-        </div>
+            <!-- 3 Synced Views -->
+            <div class="maps-triptych">
+                <!-- Timeline Prime -->
+                <div class="map-card">
+                    <div class="map-card-header">Timeline Prime (Unperturbed)</div>
+                    <div class="map-viewport" id="viewport-prime">
+                        <canvas id="canvas-prime"></canvas>
+                        <svg class="map-overlay-layer" id="svg-prime"></svg>
+                    </div>
+                    <div class="hover-info-dock" id="hover-prime">
+                        <span><strong class="num" id="hov-lat-prime">&mdash;</strong>, <strong class="num" id="hov-lon-prime">&mdash;</strong></span>
+                        <span><strong class="num" id="hov-val-prime">&mdash;</strong></span>
+                    </div>
+                </div>
 
-        <!-- Right Panel: Scientific & Socio-Economic Impact Co-Pilot -->
-        <div class="panel">
-            <div class="panel-title">🌾 Impact Co-Pilot & Policy Advisory</div>
+                <!-- Timeline Branch -->
+                <div class="map-card">
+                    <div class="map-card-header">Multiverse Branch (Perturbed)</div>
+                    <div class="map-viewport" id="viewport-branch">
+                        <canvas id="canvas-branch"></canvas>
+                        <svg class="map-overlay-layer" id="svg-branch"></svg>
+                    </div>
+                    <div class="hover-info-dock" id="hover-branch">
+                        <span><strong class="num" id="hov-lat-branch">&mdash;</strong>, <strong class="num" id="hov-lon-branch">&mdash;</strong></span>
+                        <span><strong class="num" id="hov-val-branch">&mdash;</strong></span>
+                    </div>
+                </div>
 
-            <div class="stat-card">
-                <label>Extreme Flood Cells (>150mm)</label>
-                <div class="stat-value" id="floodCellsStat" style="color:var(--accent-red);">0 Cells</div>
-            </div>
-
-            <div class="stat-card">
-                <label>Kharif Crop Moisture Stress</label>
-                <div class="stat-value" id="cropStressStat" style="color:var(--accent-orange);">18.4%</div>
-            </div>
-
-            <div class="stat-card">
-                <label>Wind Energy Capacity Density</label>
-                <div class="stat-value" id="windPowerStat" style="color:var(--accent-green);">124 W/m²</div>
-            </div>
-
-            <div class="control-group">
-                <label>Regional Agricultural Risk Status</label>
-                <div id="regionalList">
-                    <!-- Populated dynamically -->
+                <!-- Difference Map -->
+                <div class="map-card">
+                    <div class="map-card-header">Difference (&Delta; = Branch &minus; Prime)</div>
+                    <div class="map-viewport" id="viewport-diff">
+                        <canvas id="canvas-diff"></canvas>
+                        <svg class="map-overlay-layer" id="svg-diff"></svg>
+                    </div>
+                    <div class="hover-info-dock" id="hover-diff">
+                        <span><strong class="num" id="hov-lat-diff">&mdash;</strong>, <strong class="num" id="hov-lon-diff">&mdash;</strong></span>
+                        <span>&Delta;: <strong class="num" id="hov-val-diff">&mdash;</strong></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="control-group">
-                <label>Policy Co-Pilot Advisory</label>
-                <div class="advisory-box" id="policyAdvisory">
-                    Simulating live atmospheric trajectory...
+            <!-- Synchronized Colorbar -->
+            <div class="colorbar-container">
+                <div class="colorbar-labels">
+                    <span id="cbar-min" class="num">0.0</span>
+                    <span id="cbar-title">Precipitation (mm/day)</span>
+                    <span id="cbar-max" class="num">50.0</span>
+                </div>
+                <div class="colorbar-strip" id="cbar-gradient"></div>
+            </div>
+        </main>
+
+        <!-- Right: Control Rail -->
+        <aside class="control-rail">
+
+            <!-- Initial State Selector -->
+            <div class="rail-section">
+                <div class="rail-section-title">Initial State Window</div>
+                <div class="field-row">
+                    <select id="window-picker" class="instrument-select" style="flex:1;" onchange="onWindowSelected()">
+                        <option value="">Loading...</option>
+                    </select>
+                    <button class="btn-instrument" onclick="toggleCustomStateModal()">Paste</button>
                 </div>
             </div>
+
+            <!-- Shock Studio -->
+            <div class="rail-section">
+                <div class="rail-section-title">
+                    <span>Shock Studio</span>
+                    <span id="shock-active-badge" style="font-size:10px; color:var(--text-muted); font-weight:normal;">Null Shock</span>
+                </div>
+
+                <div class="field-group">
+                    <div class="preset-grid">
+                        <button class="btn-instrument" onclick="applyPresetShock('warm_ocean')">Warm Ocean (+3K BoB)</button>
+                        <button class="btn-instrument" onclick="applyPresetShock('monsoon_stall')">Monsoon Stall (-40%)</button>
+                    </div>
+                    <button class="btn-instrument danger" style="width:100%;" onclick="resetShock()">Null Shock</button>
+                </div>
+
+                <div class="field-group" style="margin-top:6px;">
+                    <div class="field-row" style="margin-bottom:4px;">
+                        <select id="shock-geometry" class="instrument-select" style="flex:1;">
+                            <option value="circle">Circle Radius</option>
+                            <option value="box">Bounding Box</option>
+                        </select>
+                        <select id="shock-channel" class="instrument-select" style="flex:1;">
+                            <option value="0">t2m (K)</option>
+                            <option value="1">tp (mm/day)</option>
+                            <option value="2">u10 (m/s)</option>
+                            <option value="3">v10 (m/s)</option>
+                            <option value="4">msl (Pa)</option>
+                            <option value="5">tcwv (%)</option>
+                        </select>
+                    </div>
+                    <div class="field-row">
+                        <input id="shock-mag" type="number" step="0.5" value="3.0" class="instrument-input" style="width:65px;">
+                        <span id="shock-unit" style="font-size:10.5px; color:var(--text-muted);">K</span>
+                        <label style="margin-left:auto; display:flex; align-items:center; gap:4px; font-size:10.5px; cursor:pointer;">
+                            <input type="checkbox" id="shock-soft-edge" checked> Soft Edge
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Distance vs Response Mini-chart -->
+                <div class="chart-box" id="distance-chart-box">
+                    <div style="font-size:9.5px; color:var(--text-muted); margin-bottom:3px; display:flex; justify-content:space-between;">
+                        <span>Shock Response vs Distance</span>
+                        <span>Energy Spread</span>
+                    </div>
+                    <canvas id="canvas-distance-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Regional Socio-Economic Impacts -->
+            <div class="rail-section">
+                <div class="rail-section-title">
+                    <span>Regional Impacts</span>
+                    <span style="font-size:9.5px; font-weight:normal; color:var(--text-muted);">Land Only</span>
+                </div>
+
+                <!-- Attribution Summary -->
+                <div id="attribution-summary" style="font-size:10.5px; padding:5px 8px; background-color:#fff; border:1px solid var(--border-subtle); margin-bottom:6px; border-radius:2px; display:none;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>Mean Land &Delta;T: <strong id="attr-dt" class="num">0.00</strong> K</span>
+                        <span>Max &Delta;Rain: <strong id="attr-dr" class="num">0.00</strong> mm</span>
+                    </div>
+                </div>
+
+                <!-- Region Cards Container -->
+                <div id="regional-cards-container"></div>
+
+                <!-- Plain Specific Advisories -->
+                <div style="margin-top:8px;">
+                    <div style="font-size:10px; font-weight:600; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase;">Advisories</div>
+                    <div id="advisories-container"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Bottom Time Dock -->
+    <footer class="time-dock">
+        <div class="time-controls">
+            <button id="btn-step-prev" class="btn-instrument" onclick="stepDelta(-1)" aria-label="Previous">&larr;</button>
+            <button id="btn-play-pause" class="btn-instrument" onclick="togglePlayLoop()" style="min-width:54px;">Play</button>
+            <button id="btn-step-next" class="btn-instrument" onclick="stepDelta(1)" aria-label="Next">&rarr;</button>
         </div>
-    </main>
+        <div class="scrubber-container">
+            <input type="range" id="time-scrubber" class="scrubber" min="1" max="10" value="1" step="1" oninput="onScrubberInput(this.value)">
+            <span class="step-display"><span class="num" id="current-step-label">Day 1</span> / <span class="num" id="total-steps-label">10</span></span>
+        </div>
+    </footer>
+
+    <!-- Custom State Modal -->
+    <dialog id="custom-state-dialog" style="padding:16px; border:1px solid var(--border-hairline); border-radius:2px; max-width:500px; background:#fff; margin:auto;">
+        <h3 style="font-family:'Source Serif', serif; font-size:15px; margin-bottom:8px; color:var(--accent-oxford);">Paste Meteorological Window</h3>
+        <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">
+            JSON with <code>init_states</code> [3, 6, 32, 36] and <code>doy_sincos</code> [sin, cos].
+        </p>
+        <textarea id="custom-json-input" style="width:100%; height:150px; font-family:monospace; font-size:10.5px; padding:6px; border:1px solid var(--border-hairline); margin-bottom:10px;"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:6px;">
+            <button class="btn-instrument" onclick="document.getElementById('custom-state-dialog').close()">Cancel</button>
+            <button class="btn-instrument primary" onclick="applyCustomState()">Apply</button>
+        </div>
+    </dialog>
 
     <script>
-        let currentRollout = null;
-        let baselineRollout = null;
-        let perturbedRollout = null;
-        let impactData = null;
-        let currentDay = 0;
-        let isPlaying = false;
-        let playInterval = null;
+        const NLAT = 32;
+        const NLON = 36;
+        const LAT_MIN = 6.5;
+        const LAT_MAX = 37.5;
+        const LON_MIN = 65.5;
+        const LON_MAX = 100.5;
 
-        const CHANNELS_INFO = [
-            { name: "2m Temperature",           unit: "°C",    offset: -273.15, factor: 1,    min: 10,   max: 48,   diffMin: -5,  diffMax: 5,  colors: ["#313695","#4575b4","#74add1","#fee090","#f46d43","#a50026"], diffColors: ["#2166ac","#67a9cf","#f7f7f7","#ef8a62","#b2182b"] },
-            { name: "Total Precipitation",       unit: "mm/day",offset: 0,       factor: 1,    min: 0,    max: 50,   diffMin: -15, diffMax: 15, colors: ["#ffffd9","#c7e9b4","#41b6c4","#225ea8","#081d58"],         diffColors: ["#8c510a","#f6e8c3","#f5f5f5","#c7eae5","#01665e"] },
-            { name: "10m Zonal Wind",            unit: "m/s",   offset: 0,       factor: 1,    min: -15,  max: 15,   diffMin: -8,  diffMax: 8,  colors: ["#2166ac","#67a9cf","#f7f7f7","#ef8a62","#b2182b"],         diffColors: ["#2166ac","#67a9cf","#f7f7f7","#ef8a62","#b2182b"] },
-            { name: "10m Meridional Wind",       unit: "m/s",   offset: 0,       factor: 1,    min: -15,  max: 15,   diffMin: -8,  diffMax: 8,  colors: ["#2166ac","#67a9cf","#f7f7f7","#ef8a62","#b2182b"],         diffColors: ["#2166ac","#67a9cf","#f7f7f7","#ef8a62","#b2182b"] },
-            { name: "Sea Level Pressure",        unit: "hPa",   offset: 0,       factor: 0.01, min: 990,  max: 1018, diffMin: -5,  diffMax: 5,  colors: ["#40004b","#762a83","#9970ab","#d9f0d3","#1b7837"],         diffColors: ["#2166ac","#67a9cf","#f7f7f7","#ef8a62","#b2182b"] },
-            { name: "Total Column Water Vapor",  unit: "kg/m²", offset: 0,       factor: 1,    min: 5,    max: 65,   diffMin: -10, diffMax: 10, colors: ["#f7fcf5","#c7e9c0","#74c476","#238b45","#00441b"],         diffColors: ["#8c510a","#f6e8c3","#f5f5f5","#c7eae5","#01665e"] }
+        const CHANNEL_CONFIG = [
+            { name: "2m Temperature", unit: "°C", isTemp: true, min: 20, max: 35, diverging: false },
+            { name: "Precipitation", unit: "mm/day", isRain: true, min: 0, max: 15, diverging: false },
+            { name: "10m Eastward Wind", unit: "m/s", min: -5, max: 15, diverging: true },
+            { name: "10m Northward Wind", unit: "m/s", min: -5, max: 10, diverging: true },
+            { name: "MSL Pressure", unit: "hPa", isMsl: true, min: 995, max: 1025, diverging: false },
+            { name: "Total Column Water Vapour", unit: "kg/m²", min: 25, max: 65, diverging: false }
         ];
 
-        function showLoadingOnCanvas(msg = "Computing climate trajectory...") {
-            const canvas = document.getElementById("climateMap");
-            const ctx = canvas.getContext("2d");
-            ctx.fillStyle = "#0a0e17";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#38bdf8";
-            ctx.font = "14px 'Inter', system-ui, sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText(msg, canvas.width / 2, canvas.height / 2 - 10);
-            ctx.fillStyle = "#94a3b8";
-            ctx.font = "12px 'Inter', system-ui, sans-serif";
-            ctx.fillText("Simulating 6 atmospheric channels over India...", canvas.width / 2, canvas.height / 2 + 15);
+        let state = {
+            online: false,
+            currentChannel: 1,
+            currentStep: 1,
+            totalSteps: 10,
+            isPlaying: false,
+            playTimer: null,
+            baselineRollout: null,
+            perturbedRollout: null,
+            diffRollout: null,
+            landSeaMask: null,
+            indiaGeo: null,
+            activeShockType: 'null',
+            activePreset: null,
+            customShock: null,
+            shockFootprint: null,
+            distanceResponse: [],
+            selectedWindowId: 'monsoon_depression_2010',
+            customInitStates: null,
+            customDoySincos: null,
+            isDraggingShock: false,
+            dragStartPos: null
+        };
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            initCanvases();
+            await loadStaticGeo();
+            await loadWindows();
+            pollHealth();
+            setInterval(pollHealth, 5000);
+            runSimulation();
+        });
+
+        let canvases = {}, contexts = {}, svgs = {};
+
+        function initCanvases() {
+            ['prime', 'branch', 'diff'].forEach(id => {
+                const c = document.getElementById(`canvas-${id}`);
+                const vp = document.getElementById(`viewport-${id}`);
+                c.width = NLON * 8;
+                c.height = NLAT * 8;
+                canvases[id] = c;
+                contexts[id] = c.getContext('2d');
+                svgs[id] = document.getElementById(`svg-${id}`);
+
+                vp.addEventListener('mousemove', (e) => onMapMouseMove(e, vp));
+                vp.addEventListener('mouseleave', () => onMapMouseLeave());
+                vp.addEventListener('mousedown', (e) => onMapMouseDown(e, vp));
+            });
+            window.addEventListener('mouseup', (e) => onMapMouseUp(e));
+        }
+
+        async function loadStaticGeo() {
+            try {
+                const [geoResp, maskResp] = await Promise.all([
+                    fetch('/static/data/india_geo.json'),
+                    fetch('/static/data/land_sea_mask.json')
+                ]);
+                if (geoResp.ok) state.indiaGeo = await geoResp.json();
+                if (maskResp.ok) {
+                    const maskData = await maskResp.json();
+                    state.landSeaMask = maskData.lsm;
+                }
+            } catch (err) {
+                console.warn('Geo loading error:', err);
+            }
+        }
+
+        async function loadWindows() {
+            try {
+                const resp = await fetch('/api/windows');
+                if (resp.ok) {
+                    const list = await resp.json();
+                    const picker = document.getElementById('window-picker');
+                    picker.innerHTML = '';
+                    list.forEach(w => {
+                        const opt = document.createElement('option');
+                        opt.value = w.id;
+                        opt.textContent = w.name;
+                        picker.appendChild(opt);
+                    });
+                    if (list.length > 0) {
+                        state.selectedWindowId = list[0].id;
+                    }
+                }
+            } catch (err) {
+                console.warn('Windows load error:', err);
+            }
+        }
+
+        async function pollHealth() {
+            try {
+                const resp = await fetch('/api/health');
+                const data = await resp.json();
+                const ind = document.getElementById('engine-indicator');
+                const txt = document.getElementById('engine-status-text');
+                const alertBox = document.getElementById('offline-alert');
+
+                if (data.online) {
+                    state.online = true;
+                    ind.className = 'status-indicator online';
+                    txt.textContent = `${data.model_name || 'Ready'}`;
+                    alertBox.style.display = 'none';
+                } else {
+                    state.online = false;
+                    ind.className = 'status-indicator offline';
+                    txt.textContent = 'Offline';
+                    alertBox.style.display = 'block';
+                }
+            } catch (err) {
+                state.online = false;
+                document.getElementById('engine-indicator').className = 'status-indicator offline';
+                document.getElementById('engine-status-text').textContent = 'Offline';
+                document.getElementById('offline-alert').style.display = 'block';
+            }
         }
 
         async function runSimulation() {
-            const mode = document.getElementById("simMode").value;
-            const steps = parseInt(document.getElementById("stepSelect").value);
-            const t0 = performance.now();
-
-            // Auto-select best channel for each mode
-            const channelSel = document.getElementById("channelSelect");
-            if (mode === "diff" || mode === "shock_bob" || mode === "shock_heatwave") {
-                channelSel.value = "0"; // t2m shows temperature shock best
-            } else if (mode === "shock_wind") {
-                channelSel.value = "2"; // u10 shows wind shock best
-            } else {
-                channelSel.value = "1"; // tp for baseline Timeline Prime
-            }
-
-            showLoadingOnCanvas(`Running ${mode === 'prime' ? 'Timeline Prime' : 'Multiverse Shock'}...`);
+            const payload = {
+                steps: 10,
+                window_id: state.selectedWindowId,
+                shock_type: state.activeShockType,
+                preset_name: state.activePreset,
+                perturbation: state.customShock,
+                init_states: state.customInitStates,
+                doy_sincos: state.customDoySincos
+            };
 
             try {
-                const resp = await fetch("/api/simulate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ mode: mode, steps: steps })
+                const resp = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
+
                 if (!resp.ok) {
-                    throw new Error(`HTTP ${resp.status}: ${await resp.text()}`);
+                    const err = await resp.json();
+                    document.getElementById('offline-alert').style.display = 'block';
+                    document.getElementById('offline-alert').innerHTML = `<strong>Simulation Engine Error:</strong> ${err.error || 'Server error'}`;
+                    return;
                 }
+
+                document.getElementById('offline-alert').style.display = 'none';
                 const data = await resp.json();
-                currentRollout = data.rollout;
-                baselineRollout = data.baseline;
-                perturbedRollout = data.perturbed;
-                impactData = data.impact;
 
-                const latMs = Math.round(data.inference_ms || (performance.now() - t0));
-                document.getElementById("latencyStat").innerText = `${latMs} ms`;
+                state.baselineRollout = data.baseline;
+                state.perturbedRollout = data.perturbed || data.baseline;
+                state.diffRollout = data.difference || null;
+                state.shockFootprint = data.shock_footprint;
+                state.distanceResponse = data.distance_response || [];
+                state.totalSteps = data.steps || 10;
 
-                updateImpactUI(impactData);
-                updateVisualization();
+                const scrubber = document.getElementById('time-scrubber');
+                scrubber.max = state.totalSteps;
+                if (state.currentStep > state.totalSteps) state.currentStep = state.totalSteps;
+                document.getElementById('total-steps-label').textContent = state.totalSteps;
+                document.getElementById('inference-ms-text').textContent = data.inference_ms;
+
+                renderImpactPanel(data.impact);
+                renderDistanceChart();
+                updateColorbar();
+                redrawAllMaps();
             } catch (err) {
-                console.error("Simulation error:", err);
-                const canvas = document.getElementById("climateMap");
-                const ctx = canvas.getContext("2d");
-                ctx.fillStyle = "#0a0e17";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = "#ef4444";
-                ctx.font = "13px system-ui";
-                ctx.textAlign = "center";
-                ctx.fillText(`Error: ${err.message}`, canvas.width / 2, canvas.height / 2);
+                console.error('Simulation failed:', err);
             }
         }
 
-        function updateImpactUI(impact) {
-            if (!impact) return;
-            document.getElementById("floodCellsStat").innerText = `${impact.high_flood_cells_count} Cells`;
-            document.getElementById("cropStressStat").innerText = `${impact.crop_stress_index_pct}%`;
-            document.getElementById("windPowerStat").innerText = `${impact.mean_wind_power_w_m2} W/m²`;
+        function redrawAllMaps() {
+            if (!state.baselineRollout) return;
+            const ch = state.currentChannel;
+            const stepIdx = state.currentStep - 1;
 
-            // Regional List
-            const regContainer = document.getElementById("regionalList");
-            regContainer.innerHTML = "";
-            (impact.regional_insights || []).forEach(r => {
-                const color = r.status.includes("Warning") ? "var(--accent-red)" : (r.status.includes("Stress") ? "var(--accent-orange)" : "var(--accent-green)");
-                regContainer.innerHTML += `
-                    <div class="region-row">
-                        <span>${r.region.split("(")[0]}</span>
-                        <span style="color:${color}; font-weight:600;">${r.status}</span>
-                    </div>
-                `;
+            const baseSlice = state.baselineRollout[stepIdx][ch];
+            const pertSlice = state.perturbedRollout ? state.perturbedRollout[stepIdx][ch] : baseSlice;
+            const diffSlice = state.diffRollout ? state.diffRollout[stepIdx][ch] : null;
+
+            drawField('prime', baseSlice, ch, false);
+            drawField('branch', pertSlice, ch, false);
+            drawField('diff', diffSlice, ch, true);
+
+            ['prime', 'branch', 'diff'].forEach(id => renderSvgOverlay(id));
+
+            // Sync Scrubber and Day Label
+            const scrubber = document.getElementById('time-scrubber');
+            if (scrubber && parseInt(scrubber.value) !== state.currentStep) {
+                scrubber.value = state.currentStep;
+            }
+            const label = document.getElementById('current-step-label');
+            if (label) {
+                label.textContent = `Day ${state.currentStep}`;
+            }
+        }
+
+        /* Bilinear Smooth Field with North-Up Orientation (y=0 top is r=31) */
+        function drawField(viewId, grid2d, chIdx, isDiff) {
+            const ctx = contexts[viewId];
+            const canvas = canvases[viewId];
+            const W = canvas.width;
+            const H = canvas.height;
+
+            if (!grid2d) {
+                ctx.clearRect(0, 0, W, H);
+                return;
+            }
+
+            const imgData = ctx.createImageData(W, H);
+            const data = imgData.data;
+            const cfg = CHANNEL_CONFIG[chIdx];
+
+            let diffMax = 1.0;
+            if (isDiff) {
+                let maxAbs = 0.0;
+                for (let r = 0; r < NLAT; r++) {
+                    for (let c = 0; c < NLON; c++) {
+                        const val = Math.abs(grid2d[r][c]);
+                        if (val > maxAbs) maxAbs = val;
+                    }
+                }
+                diffMax = Math.max(maxAbs, 1e-4);
+            }
+
+            for (let y = 0; y < H; y++) {
+                const normY = 1.0 - (y + 0.5) / H;
+                const rFloat = normY * (NLAT - 1);
+
+                for (let x = 0; x < W; x++) {
+                    const normX = (x + 0.5) / W;
+                    const cFloat = normX * (NLON - 1);
+
+                    const r0 = Math.floor(rFloat);
+                    const r1 = Math.min(NLAT - 1, r0 + 1);
+                    const c0 = Math.floor(cFloat);
+                    const c1 = Math.min(NLON - 1, c0 + 1);
+                    const dr = rFloat - r0;
+                    const dc = cFloat - c0;
+
+                    const v00 = grid2d[r0][c0];
+                    const v10 = grid2d[r1][c0];
+                    const v01 = grid2d[r0][c1];
+                    const v11 = grid2d[r1][c1];
+
+                    const val = (1 - dr) * (1 - dc) * v00 +
+                                dr * (1 - dc) * v10 +
+                                (1 - dr) * dc * v01 +
+                                dr * dc * v11;
+
+                    let rgb;
+                    if (isDiff) {
+                        const norm = Math.max(-1.0, Math.min(1.0, val / diffMax));
+                        rgb = getDivergingColor(norm);
+                    } else {
+                        let phys = val;
+                        if (cfg.isTemp) phys = val - 273.15;
+                        if (cfg.isMsl) phys = val / 100.0;
+
+                        // Power curve for precipitation (gamma 0.5) so changes are visibly highlighted
+                        let norm = Math.max(0.0, Math.min(1.0, (phys - cfg.min) / (cfg.max - cfg.min)));
+                        if (cfg.isRain) {
+                            norm = Math.pow(norm, 0.5);
+                        }
+                        rgb = getSequentialColor(norm, chIdx);
+                    }
+
+                    const idx = (y * W + x) * 4;
+                    data[idx] = rgb[0];
+                    data[idx + 1] = rgb[1];
+                    data[idx + 2] = rgb[2];
+                    data[idx + 3] = 255;
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+            drawContours(ctx, grid2d, isDiff, diffMax, cfg);
+        }
+
+        function getSequentialColor(t, chIdx) {
+            if (chIdx === 1) {
+                if (t < 0.05) return [246, 245, 240];
+                if (t < 0.3) {
+                    const s = (t - 0.05) / 0.25;
+                    return [Math.round(246 - s * 80), Math.round(245 - s * 55), Math.round(240 - s * 30)];
+                } else if (t < 0.7) {
+                    const s = (t - 0.3) / 0.4;
+                    return [Math.round(166 - s * 110), Math.round(190 - s * 80), Math.round(210 - s * 45)];
+                } else {
+                    const s = (t - 0.7) / 0.3;
+                    return [Math.round(56 - s * 36), Math.round(110 - s * 70), Math.round(165 - s * 85)];
+                }
+            }
+            if (chIdx === 0) {
+                return [
+                    Math.round(250 - t * 80),
+                    Math.round(240 - t * 140),
+                    Math.round(210 - t * 160)
+                ];
+            }
+            return [
+                Math.round(240 - t * 180),
+                Math.round(245 - t * 150),
+                Math.round(240 - t * 120)
+            ];
+        }
+
+        function getDivergingColor(norm) {
+            if (norm < 0) {
+                const s = -norm;
+                return [
+                    Math.round(246 - s * 160),
+                    Math.round(245 - s * 110),
+                    Math.round(240 - s * 50)
+                ];
+            } else {
+                const s = norm;
+                return [
+                    Math.round(246 - s * 60),
+                    Math.round(245 - s * 150),
+                    Math.round(240 - s * 180)
+                ];
+            }
+        }
+
+        function drawContours(ctx, grid2d, isDiff, diffMax, cfg) {
+            ctx.save();
+            ctx.strokeStyle = isDiff ? 'rgba(31, 35, 40, 0.28)' : 'rgba(26, 54, 93, 0.22)';
+            ctx.lineWidth = 1;
+
+            const levels = isDiff ? [-diffMax * 0.5, 0, diffMax * 0.5] : [cfg.min + (cfg.max - cfg.min) * 0.33, cfg.min + (cfg.max - cfg.min) * 0.66];
+            const cellW = ctx.canvas.width / NLON;
+            const cellH = ctx.canvas.height / NLAT;
+
+            levels.forEach(lvl => {
+                for (let r = 0; r < NLAT - 1; r++) {
+                    const yTop = (NLAT - 1 - (r + 1)) * cellH;
+                    for (let c = 0; c < NLON - 1; c++) {
+                        let v0 = grid2d[r][c];
+                        let v1 = grid2d[r][c + 1];
+                        if (cfg.isTemp && !isDiff) { v0 -= 273.15; v1 -= 273.15; }
+                        if ((v0 <= lvl && v1 > lvl) || (v0 > lvl && v1 <= lvl)) {
+                            const x = (c + 0.5) * cellW;
+                            ctx.beginPath();
+                            ctx.moveTo(x, yTop);
+                            ctx.lineTo(x, yTop + cellH);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            });
+            ctx.restore();
+        }
+
+        function renderSvgOverlay(viewId) {
+            const svg = svgs[viewId];
+            if (!svg) return;
+            svg.innerHTML = '';
+            svg.setAttribute('viewBox', '0 0 36 32');
+
+            // Graticule & Tick labels
+            for (let lon = 70; lon <= 95; lon += 5) {
+                const x = lon - LON_MIN;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', 0);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', 32);
+                line.setAttribute('stroke', 'var(--grid-line)');
+                line.setAttribute('stroke-width', '0.2');
+                line.setAttribute('stroke-dasharray', '0.4 0.4');
+                svg.appendChild(line);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x);
+                text.setAttribute('y', 31.5);
+                text.setAttribute('font-size', '0.9');
+                text.setAttribute('fill', 'rgba(31, 35, 40, 0.45)');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = `${lon}°E`;
+                svg.appendChild(text);
+            }
+
+            for (let lat = 10; lat <= 35; lat += 5) {
+                const y = LAT_MAX - lat;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', 0);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', 36);
+                line.setAttribute('y2', y);
+                line.setAttribute('stroke', 'var(--grid-line)');
+                line.setAttribute('stroke-width', '0.2');
+                line.setAttribute('stroke-dasharray', '0.4 0.4');
+                svg.appendChild(line);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 0.8);
+                text.setAttribute('y', y - 0.2);
+                text.setAttribute('font-size', '0.9');
+                text.setAttribute('fill', 'rgba(31, 35, 40, 0.45)');
+                text.textContent = `${lat}°N`;
+                svg.appendChild(text);
+            }
+
+            // Natural Earth Coastlines & Boundaries
+            if (state.indiaGeo) {
+                (state.indiaGeo.coast_and_border || []).forEach(polyline => {
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                    const pts = polyline.map(([lon, lat]) => `${(lon - LON_MIN).toFixed(2)},${(LAT_MAX - lat).toFixed(2)}`).join(' ');
+                    path.setAttribute('points', pts);
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke', '#4a5568');
+                    path.setAttribute('stroke-width', '0.4');
+                    path.setAttribute('stroke-linejoin', 'round');
+                    svg.appendChild(path);
+                });
+
+                (state.indiaGeo.state_borders || []).forEach(polyline => {
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                    const pts = polyline.map(([lon, lat]) => `${(lon - LON_MIN).toFixed(2)},${(LAT_MAX - lat).toFixed(2)}`).join(' ');
+                    path.setAttribute('points', pts);
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke', '#a0aec0');
+                    path.setAttribute('stroke-width', '0.22');
+                    path.setAttribute('stroke-dasharray', '0.6 0.4');
+                    svg.appendChild(path);
+                });
+            }
+
+            if (state.shockFootprint) {
+                drawFootprintOutline(svg, state.shockFootprint);
+            }
+        }
+
+        function drawFootprintOutline(svg, footprint) {
+            const magGrid = [];
+            for (let r = 0; r < NLAT; r++) {
+                magGrid[r] = [];
+                for (let c = 0; c < NLON; c++) {
+                    let sum = 0;
+                    for (let ch = 0; ch < 6; ch++) sum += Math.abs(footprint[ch][r][c]);
+                    magGrid[r][c] = sum;
+                }
+            }
+
+            for (let r = 0; r < NLAT; r++) {
+                for (let c = 0; c < NLON; c++) {
+                    if (magGrid[r][c] > 1e-4) {
+                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect.setAttribute('x', c);
+                        rect.setAttribute('y', LAT_MAX - (LAT_MIN + r) - 1);
+                        rect.setAttribute('width', 1);
+                        rect.setAttribute('height', 1);
+                        rect.setAttribute('fill', 'rgba(158, 42, 43, 0.22)');
+                        rect.setAttribute('stroke', 'var(--accent-crimson)');
+                        rect.setAttribute('stroke-width', '0.25');
+                        svg.appendChild(rect);
+                    }
+                }
+            }
+        }
+
+        function onMapMouseMove(e, vp) {
+            const rect = vp.getBoundingClientRect();
+            const px = (e.clientX - rect.left) / rect.width;
+            const py = (e.clientY - rect.top) / rect.height;
+
+            const c = Math.max(0, Math.min(NLON - 1, Math.floor(px * NLON)));
+            const r = Math.max(0, Math.min(NLAT - 1, NLAT - 1 - Math.floor(py * NLAT)));
+
+            const lat = (LAT_MIN + r).toFixed(1);
+            const lon = (LON_MIN + c).toFixed(1);
+            const ch = state.currentChannel;
+            const cfg = CHANNEL_CONFIG[ch];
+            const sIdx = state.currentStep - 1;
+
+            let valP = '—', valB = '—', valD = '—';
+
+            if (state.baselineRollout) {
+                let v = state.baselineRollout[sIdx][ch][r][c];
+                if (cfg.isTemp) v -= 273.15;
+                if (cfg.isMsl) v /= 100.0;
+                valP = `${v.toFixed(2)} ${cfg.unit}`;
+            }
+            if (state.perturbedRollout) {
+                let v = state.perturbedRollout[sIdx][ch][r][c];
+                if (cfg.isTemp) v -= 273.15;
+                if (cfg.isMsl) v /= 100.0;
+                valB = `${v.toFixed(2)} ${cfg.unit}`;
+            }
+            if (state.diffRollout) {
+                let v = state.diffRollout[sIdx][ch][r][c];
+                if (cfg.isMsl) v /= 100.0;
+                valD = `${v > 0 ? '+' : ''}${v.toFixed(2)} ${cfg.unit}`;
+            }
+
+            ['prime', 'branch', 'diff'].forEach(id => {
+                document.getElementById(`hov-lat-${id}`).textContent = `${lat}°N`;
+                document.getElementById(`hov-lon-${id}`).textContent = `${lon}°E`;
             });
 
-            // Policy Advisory
-            const advBox = document.getElementById("policyAdvisory");
-            advBox.innerText = (impact.policy_advisories && impact.policy_advisories[0]) || "Normal operations.";
+            document.getElementById('hov-val-prime').textContent = valP;
+            document.getElementById('hov-val-branch').textContent = valB;
+            document.getElementById('hov-val-diff').textContent = valD;
         }
 
-        function updateVisualization() {
-            if (!currentRollout) return;
-            const cIdx = parseInt(document.getElementById("channelSelect").value);
-            const ch = CHANNELS_INFO[cIdx];
-            const canvas = document.getElementById("climateMap");
-            const ctx = canvas.getContext("2d");
-            const mode = document.getElementById("simMode").value;
-            const isDiff = (mode === "diff");
+        function onMapMouseLeave() {
+            ['prime', 'branch', 'diff'].forEach(id => {
+                document.getElementById(`hov-lat-${id}`).textContent = '—';
+                document.getElementById(`hov-lon-${id}`).textContent = '—';
+                document.getElementById(`hov-val-${id}`).textContent = '—';
+            });
+        }
 
-            const grid = currentRollout[currentDay][cIdx]; // [32, 36]
-            const h = grid.length;
-            const w = grid[0].length;
-            const cellW = canvas.width / w;
-            const cellH = canvas.height / h;
+        function onMapMouseDown(e, vp) {
+            state.isDraggingShock = true;
+            const rect = vp.getBoundingClientRect();
+            const px = (e.clientX - rect.left) / rect.width;
+            const py = (e.clientY - rect.top) / rect.height;
+            const c = Math.max(0, Math.min(NLON - 1, Math.floor(px * NLON)));
+            const r = Math.max(0, Math.min(NLAT - 1, NLAT - 1 - Math.floor(py * NLAT)));
+            state.dragStartPos = { r, c };
+        }
 
-            // Choose colormap and range based on mode
-            const colors = isDiff ? ch.diffColors : ch.colors;
-            const rangeMin = isDiff ? ch.diffMin : ch.min;
-            const rangeMax = isDiff ? ch.diffMax : ch.max;
+        function onMapMouseUp(e) {
+            if (!state.isDraggingShock || !state.dragStartPos) return;
+            state.isDraggingShock = false;
+            applyCustomInteractiveShock(state.dragStartPos.r, state.dragStartPos.c);
+        }
 
-            let minVal = Infinity, maxVal = -Infinity, sum = 0;
+        function applyCustomInteractiveShock(cr, cc) {
+            const ch = parseInt(document.getElementById('shock-channel').value);
+            const mag = parseFloat(document.getElementById('shock-mag').value);
+            const geom = document.getElementById('shock-geometry').value;
+            const soft = document.getElementById('shock-soft-edge').checked;
 
-            for (let r = 0; r < h; r++) {
-                for (let c = 0; c < w; c++) {
-                    let val = grid[r][c];
-                    // Unit conversion: apply offset then factor
-                    val = (val + ch.offset) * ch.factor;
+            const pert = Array(6).fill(0).map(() => Array(NLAT).fill(0).map(() => Array(NLON).fill(0)));
+            const radius = geom === 'circle' ? 3.0 : 4.0;
 
-                    minVal = Math.min(minVal, val);
-                    maxVal = Math.max(maxVal, val);
-                    sum += val;
-
-                    // Normalize to 0..1 within display range
-                    const norm = Math.max(0, Math.min(1, (val - rangeMin) / (rangeMax - rangeMin)));
-                    ctx.fillStyle = interpolateColor(colors, norm);
-                    ctx.fillRect(c * cellW, r * cellH, Math.ceil(cellW) + 0.5, Math.ceil(cellH) + 0.5);
+            for (let r = 0; r < NLAT; r++) {
+                for (let c = 0; c < NLON; c++) {
+                    const dist = Math.sqrt((r - cr) ** 2 + (c - cc) ** 2);
+                    if (dist <= radius) {
+                        let factor = 1.0;
+                        if (soft) factor = Math.cos((dist / radius) * (Math.PI / 2));
+                        pert[ch][r][c] = mag * factor;
+                    }
                 }
             }
 
-            const meanVal = (sum / (h * w)).toFixed(2);
-            const modeLabel = isDiff ? " — Anomaly" : "";
-            document.getElementById("overlayTitle").innerText = `${ch.name} (Day ${currentDay + 1})${modeLabel}`;
-            document.getElementById("overlayStats").innerText =
-                `Min: ${minVal.toFixed(2)} ${ch.unit} | Max: ${maxVal.toFixed(2)} ${ch.unit} | Mean: ${meanVal} ${ch.unit}`;
+            state.activeShockType = 'custom';
+            state.activePreset = null;
+            state.customShock = pert;
+            document.getElementById('shock-active-badge').textContent = `Custom (${CHANNEL_CONFIG[ch].name})`;
+            runSimulation();
         }
 
-        function interpolateColor(colors, t) {
-            const idx = t * (colors.length - 1);
-            const i = Math.floor(idx);
-            const rem = idx - i;
-            if (i >= colors.length - 1) return colors[colors.length - 1];
-            return lerpHex(colors[i], colors[i + 1], rem);
+        function applyPresetShock(presetName) {
+            state.activeShockType = 'preset';
+            state.activePreset = presetName;
+            state.customShock = null;
+            document.getElementById('shock-active-badge').textContent = presetName === 'warm_ocean' ? 'Preset: Warm Ocean' : 'Preset: Monsoon Stall';
+            runSimulation();
         }
 
-        function lerpHex(a, b, t) {
-            const ah = parseInt(a.replace(/#/g, ''), 16),
-                  ar = ah >> 16, ag = (ah >> 8) & 0xff, ab = ah & 0xff,
-                  bh = parseInt(b.replace(/#/g, ''), 16),
-                  br = bh >> 16, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
-            const rr = Math.round(ar + t * (br - ar)),
-                  rg = Math.round(ag + t * (bg - ag)),
-                  rb = Math.round(ab + t * (bb - ab));
-            return `rgb(${rr},${rg},${rb})`;
+        function resetShock() {
+            state.activeShockType = 'null';
+            state.activePreset = null;
+            state.customShock = null;
+            state.shockFootprint = null;
+            document.getElementById('shock-active-badge').textContent = 'Null Shock';
+            runSimulation();
         }
 
-        function onDaySliderChange(val) {
-            currentDay = parseInt(val);
-            document.getElementById("dayLabel").innerText = `Day ${currentDay + 1}`;
-            updateVisualization();
+        function updateColorbar() {
+            const ch = state.currentChannel;
+            const cfg = CHANNEL_CONFIG[ch];
+            const strip = document.getElementById('cbar-gradient');
+
+            document.getElementById('cbar-min').textContent = `${cfg.min} ${cfg.unit}`;
+            document.getElementById('cbar-max').textContent = `${cfg.max} ${cfg.unit}`;
+            document.getElementById('cbar-title').textContent = `${cfg.name} (${cfg.unit})`;
+
+            const stops = [];
+            for (let i = 0; i <= 10; i++) {
+                const t = i / 10;
+                const rgb = getSequentialColor(t, ch);
+                stops.push(`rgb(${rgb.join(',')}) ${t * 100}%`);
+            }
+            strip.style.background = `linear-gradient(to right, ${stops.join(', ')})`;
         }
 
-        function togglePlay() {
-            isPlaying = !isPlaying;
-            document.getElementById("playIcon").innerText = isPlaying ? "⏸ Pause" : "▶ Play";
-            if (isPlaying) {
-                playInterval = setInterval(() => {
-                    currentDay = (currentDay + 1) % 10;
-                    document.getElementById("daySlider").value = currentDay;
-                    document.getElementById("dayLabel").innerText = `Day ${currentDay + 1}`;
-                    updateVisualization();
-                }, 800);
+        function onChannelChange() {
+            state.currentChannel = parseInt(document.getElementById('channel-picker').value);
+            updateColorbar();
+            redrawAllMaps();
+        }
+
+        function onScrubberInput(val) {
+            state.currentStep = parseInt(val);
+            document.getElementById('current-step-label').textContent = `Day ${state.currentStep}`;
+            redrawAllMaps();
+        }
+
+        function stepDelta(delta) {
+            let next = state.currentStep + delta;
+            if (next < 1) next = state.totalSteps;
+            if (next > state.totalSteps) next = 1;
+            document.getElementById('time-scrubber').value = next;
+            onScrubberInput(next);
+        }
+
+        function togglePlayLoop() {
+            const btn = document.getElementById('btn-play-pause');
+            if (state.isPlaying) {
+                clearInterval(state.playTimer);
+                state.isPlaying = false;
+                btn.textContent = 'Play';
             } else {
-                clearInterval(playInterval);
+                state.isPlaying = true;
+                btn.textContent = 'Pause';
+                state.playTimer = setInterval(() => stepDelta(1), 750);
             }
         }
 
-        window.onload = () => {
+        function renderDistanceChart() {
+            const canvas = document.getElementById('canvas-distance-chart');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth - 16;
+            canvas.height = 70;
+
+            const W = canvas.width;
+            const H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            if (!state.distanceResponse || state.distanceResponse.length === 0) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px sans-serif';
+                ctx.fillText('No shock active to evaluate spread', 10, H / 2);
+                return;
+            }
+
+            const days = state.distanceResponse;
+            const nBins = days[0].bins.length;
+            const barW = (W - 30) / (days.length * nBins + days.length);
+
+            let maxE = 0.01;
+            days.forEach(d => d.energies.forEach(e => { if (e > maxE) maxE = e; }));
+
+            let x = 20;
+            days.forEach((d) => {
+                d.energies.forEach((e, bIdx) => {
+                    const h = (e / maxE) * (H - 18);
+                    ctx.fillStyle = bIdx === 0 ? '#9e2a2b' : (bIdx === 1 ? '#d97706' : '#2563eb');
+                    ctx.fillRect(x, H - 14 - h, barW, h);
+                    x += barW;
+                });
+                x += barW * 0.8;
+            });
+
+            ctx.strokeStyle = '#d0cbbd';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(15, H - 14);
+            ctx.lineTo(W, H - 14);
+            ctx.stroke();
+
+            ctx.fillStyle = '#57606a';
+            ctx.font = '8.5px sans-serif';
+            ctx.fillText('Day 1', 20, H - 3);
+            ctx.fillText(`Day ${days.length}`, W - 28, H - 3);
+        }
+
+        function renderImpactPanel(impact) {
+            const container = document.getElementById('regional-cards-container');
+            if (!impact || !impact.regional_insights) return;
+
+            const attrBox = document.getElementById('attribution-summary');
+            if (impact.shock_attribution) {
+                attrBox.style.display = 'block';
+                document.getElementById('attr-dt').textContent = impact.shock_attribution.mean_land_temp_shift_k > 0 ? `+${impact.shock_attribution.mean_land_temp_shift_k}` : impact.shock_attribution.mean_land_temp_shift_k;
+                document.getElementById('attr-dr').textContent = impact.shock_attribution.max_rain_shift_mm;
+            } else {
+                attrBox.style.display = 'none';
+            }
+
+            container.innerHTML = '';
+            impact.regional_insights.forEach(reg => {
+                const card = document.createElement('div');
+                card.className = 'region-card';
+                const hasDelta = reg.delta_accumulated_rain_mm !== undefined;
+
+                card.innerHTML = `
+                    <div class="region-header">
+                        <span>${reg.region}</span>
+                    </div>
+                    <div class="region-metrics-grid">
+                        <div class="metric-cell">
+                            <span class="lbl">Rain</span>
+                            <span class="val num">
+                                ${reg.accumulated_rain_mm} mm
+                                ${hasDelta ? `<span class="delta-tag ${reg.delta_accumulated_rain_mm > 0 ? 'pos' : (reg.delta_accumulated_rain_mm < 0 ? 'neg' : 'zero')}">(${reg.delta_accumulated_rain_mm > 0 ? '+' : ''}${reg.delta_accumulated_rain_mm})</span>` : ''}
+                            </span>
+                        </div>
+                        <div class="metric-cell">
+                            <span class="lbl">Dry Spell</span>
+                            <span class="val num">
+                                ${reg.dry_spell_days} d
+                                ${hasDelta ? `<span class="delta-tag ${reg.delta_dry_spell_days < 0 ? 'pos' : (reg.delta_dry_spell_days > 0 ? 'neg' : 'zero')}">(${reg.delta_dry_spell_days > 0 ? '+' : ''}${reg.delta_dry_spell_days})</span>` : ''}
+                            </span>
+                        </div>
+                        <div class="metric-cell">
+                            <span class="lbl">&gt; 40&deg;C</span>
+                            <span class="val num">
+                                ${reg.days_above_40c} d
+                                ${hasDelta ? `<span class="delta-tag ${reg.delta_days_above_40c > 0 ? 'neg' : 'zero'}">(${reg.delta_days_above_40c > 0 ? '+' : ''}${reg.delta_days_above_40c})</span>` : ''}
+                            </span>
+                        </div>
+                        <div class="metric-cell">
+                            <span class="lbl">10m Wind Power</span>
+                            <span class="val num">
+                                ${reg.wind_power_density_10m_wm2} W/m&sup2;
+                                ${hasDelta ? `<span class="delta-tag pos">(${reg.delta_wind_power_wm2 > 0 ? '+' : ''}${reg.delta_wind_power_wm2})</span>` : ''}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            const advContainer = document.getElementById('advisories-container');
+            advContainer.innerHTML = '';
+            (impact.policy_advisories || []).forEach(adv => {
+                const box = document.createElement('div');
+                box.className = 'advisory-box';
+                box.textContent = adv;
+                advContainer.appendChild(box);
+            });
+        }
+
+        function toggleCustomStateModal() {
+            document.getElementById('custom-state-dialog').showModal();
+        }
+
+        function applyCustomState() {
+            try {
+                const text = document.getElementById('custom-json-input').value;
+                const parsed = JSON.parse(text);
+                if (!parsed.init_states || !parsed.doy_sincos) {
+                    alert('Invalid JSON: Must include "init_states" [3,6,32,36] and "doy_sincos" [sin,cos].');
+                    return;
+                }
+                state.customInitStates = parsed.init_states;
+                state.customDoySincos = parsed.doy_sincos;
+                document.getElementById('custom-state-dialog').close();
+                runSimulation();
+            } catch (err) {
+                alert(`JSON Parse Error: ${err.message}`);
+            }
+        }
+
+        function onWindowSelected() {
+            state.selectedWindowId = document.getElementById('window-picker').value;
+            state.customInitStates = null;
+            state.customDoySincos = null;
             runSimulation();
-        };
+        }
     </script>
 </body>
 </html>

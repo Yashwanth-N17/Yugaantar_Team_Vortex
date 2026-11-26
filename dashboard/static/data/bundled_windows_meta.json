@@ -1,0 +1,35 @@
+[
+  {
+    "id": "monsoon_depression_2010",
+    "name": "Monsoon Depression (July 2010)",
+    "date": "2010-07-19",
+    "doy": 200,
+    "doy_sincos": [
+      -0.2967128192734901,
+      -0.9549667548552553
+    ],
+    "description": "Real ERA5 observational data: Deep monsoon low over Bay of Bengal and central India with heavy rain."
+  },
+  {
+    "id": "monsoon_flood_surge_2020",
+    "name": "Monsoon Surge & Flooding (August 2020)",
+    "date": "2020-08-04",
+    "doy": 217,
+    "doy_sincos": [
+      -0.5595892624101763,
+      -0.828770087174504
+    ],
+    "description": "Real ERA5 observational data: Widespread heavy precipitation surge across Western Ghats and Deccan."
+  },
+  {
+    "id": "monsoon_break_2015",
+    "name": "Monsoon Break / Dry Spell (August 2015)",
+    "date": "2015-08-14",
+    "doy": 226,
+    "doy_sincos": [
+      -0.680773409477016,
+      -0.732494071613579
+    ],
+    "description": "Real ERA5 observational data: Trough shifts northward; rain deficit and high surface temperatures inland."
+  }
+]

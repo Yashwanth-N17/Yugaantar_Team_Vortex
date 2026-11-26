@@ -102,7 +102,7 @@ def create_brief_pdf(filename: str = "Multiverse_of_Monsoon_Brief.pdf") -> str:
     story.append(
         Paragraph(
             "The Multiverse of Monsoon AI engine simulates the non-linear spatiotemporal dynamics of the Indian climate system "
-            "over a 32×36 grid (1° resolution, 8°N–39°N, 68°E–103°E) across six core atmospheric channels (t2m, tp, u10, v10, msl, tcwv). "
+            "over a 32×36 grid (1° resolution, centres 6.5°N–37.5°N, 65.5°E–100.5°E) across six core atmospheric channels (t2m, tp, u10, v10, msl, tcwv). "
             "The architecture consists of six strictly sequential blocks executing autoregressive rollouts and counterfactual shock simulations:",
             body_style,
         )
@@ -218,7 +218,7 @@ def create_brief_pdf(filename: str = "Multiverse_of_Monsoon_Brief.pdf") -> str:
     story.append(
         Paragraph(
             "• <b>Extended Horizons (>14 days without global teleconnections):</b> As a regional model over India, unforced rollouts beyond 14 days "
-            "naturally lose skill due to unmodeled planetary Rossby waves entering from outside the 68°E–103°E domain.",
+            "naturally lose skill due to unmodeled planetary Rossby waves entering from outside the 65.5°E–100.5°E domain.",
             bullet_style,
         )
     )

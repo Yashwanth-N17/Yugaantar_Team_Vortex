@@ -70,7 +70,7 @@ def main() -> int:
         batch_size=args.batch_size,
         lr=args.lr,
         output_weights=args.out,
-        static_out=args.static_pt,
+        output_static=args.static_pt,
     )
     return 0
 

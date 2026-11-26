@@ -25,7 +25,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from monsoon_r1.contract import CHANNELS, NC, NLAT, NLON, SCORE_STEPS, T_IN
+from monsoon_r1.contract import CHANNELS, NC, NLAT, NLON, SCORE_STEPS, T_IN, MAX_STEPS
 from monsoon_r1.models.multiverse_model import MultiverseOfMonsoonModel
 
 app = FastAPI(title="Multiverse of Monsoon AI Engine", version="1.0.0")
@@ -39,18 +39,25 @@ WEIGHTS_PATH = ROOT_DIR / "weights.pt"
 STATIC_PATH = ROOT_DIR / "static.pt"
 STATS_PATH = ROOT_DIR / "hackdata" / "stats.json"
 
-# Load normalization scales if present
+# Load normalization scales and means if present
 channel_scales = None
+channel_means = None
 if STATS_PATH.exists():
     try:
         with open(STATS_PATH, "r") as f:
             stats = json.load(f)
             channel_scales = stats.get("std")
+            channel_means = stats.get("mean")
     except Exception:
         channel_scales = None
+        channel_means = None
 
 # Initialize model
-model = MultiverseOfMonsoonModel(channel_scales=channel_scales).to(DEVICE)
+model = MultiverseOfMonsoonModel(
+    channel_scales=channel_scales,
+    channel_means=channel_means,
+).to(DEVICE)
+
 if WEIGHTS_PATH.exists():
     state_dict = torch.load(WEIGHTS_PATH, map_location=DEVICE)
     model.load_state_dict(state_dict)
@@ -95,7 +102,7 @@ def simulate(
         perturbation: Optional localized physical shock [6, 32, 36] added to init_states[-1].
 
     Returns:
-        np.ndarray: [steps, 6, 32, 36] rollout in physical units.
+        np.ndarray: [steps, 6, 32, 36] rollout in physical units with physical bounds enforced.
     """
     with torch.no_grad():
         init_tensor = torch.from_numpy(init_states).to(DEVICE)
@@ -114,7 +121,19 @@ def simulate(
             check_finite=False,
         )
 
-        return rollout_tensor.cpu().numpy().astype("f4")
+        out = rollout_tensor.cpu().numpy().astype("f4")
+
+        # Step 4 physical clamping & nan safety:
+        # nan_to_num
+        out = np.nan_to_num(out, nan=0.0, posinf=333.15, neginf=233.15)
+        # clamp t2m (channel 0) to [233.15, 333.15]
+        out[:, 0] = np.clip(out[:, 0], 233.15, 333.15)
+        # clamp tp (channel 1) >= 0
+        out[:, 1] = np.maximum(out[:, 1], 0.0)
+        # clamp tcwv (channel 5) >= 0
+        out[:, 5] = np.maximum(out[:, 5], 0.0)
+
+        return out
 
 
 @app.get("/health")
@@ -130,12 +149,26 @@ async def simulate_endpoint(request: Request):
     t0 = time.perf_counter()
     body = await request.json()
 
+    # Validate steps
+    try:
+        raw_steps = body.get("steps", SCORE_STEPS)
+        steps = int(raw_steps)
+        if steps < 1 or steps > MAX_STEPS:
+            return JSONResponse(
+                status_code=400,
+                content={"error": f"Invalid steps {steps}; must be between 1 and {MAX_STEPS}"},
+            )
+    except (ValueError, TypeError):
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Invalid steps format: {body.get('steps')}"},
+        )
+
     init_states = _arr(body["init_states"])
     perturbation = (
         None if body.get("perturbation") is None else _arr(body["perturbation"])
     )
     doy_sincos = body["doy_sincos"]
-    steps = int(body.get("steps", SCORE_STEPS))
 
     out = simulate(init_states, doy_sincos, steps, perturbation)
     inference_ms = (time.perf_counter() - t0) * 1000.0
