@@ -72,12 +72,25 @@ class MultiverseOfMonsoonModel(nn.Module):
         block5: Optional[ForecastDecoder] = None,
         block6: Optional[ResidualStateTransition] = None,
         channel_scales: Optional[Union[torch.Tensor, Sequence[float]]] = None,
+        channel_means: Optional[Union[torch.Tensor, Sequence[float]]] = None,
         state_is_normalized: bool = False,
     ) -> None:
-        """Initialize full 6-block MultiverseOfMonsoonModel."""
+        """Initialize full 6-block MultiverseOfMonsoonModel.
+
+        Args:
+            channel_means: Per-channel means from stats.json used to normalise raw physical
+                inputs inside Block 1 (ClimateInputEncoder), so all 6 channels (temperature,
+                rain, wind, pressure, moisture) are on the same zero-mean scale before the
+                first convolution.
+            channel_scales: Per-channel standard deviations for Block 6 delta scaling and
+                the weighted training loss.
+        """
         super().__init__()
 
-        self.block1 = block1 if block1 is not None else ClimateInputEncoder()
+        self.block1 = block1 if block1 is not None else ClimateInputEncoder(
+            input_mean=channel_means,
+            input_std=channel_scales,
+        )
         self.block2 = block2 if block2 is not None else MultiScaleSpatialEncoder()
         self.block3 = block3 if block3 is not None else TemporalDynamicsEncoder()
         self.block4 = block4 if block4 is not None else SpatialContextAttention()

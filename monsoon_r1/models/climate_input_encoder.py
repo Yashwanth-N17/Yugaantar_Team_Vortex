@@ -330,6 +330,8 @@ class ClimateInputEncoder(nn.Module):
         cal_features: int = 8,
         derive_preceding_days: bool = False,
         activation: Optional[nn.Module] = None,
+        input_mean: Optional[torch.Tensor] = None,
+        input_std: Optional[torch.Tensor] = None,
     ) -> None:
         """Initialize ClimateInputEncoder.
 
@@ -344,10 +346,29 @@ class ClimateInputEncoder(nn.Module):
                 day doy_sincos (default: False).
             activation (nn.Module, optional): Optional activation applied after
                 each projection. Defaults to None (linear projections).
+            input_mean (Tensor, optional): Per-channel means [6] for input normalisation.
+                When provided along with input_std, raw physical inputs are standardised to
+                zero-mean unit-variance before entering ClimateProjection. This prevents
+                large-magnitude variables (e.g. msl ~ 101325 Pa) from dominating tiny
+                variables (e.g. tp ~ 2.5 mm/day) and forces the network to learn genuine
+                atmospheric dynamics rather than the persistence shortcut.
+            input_std (Tensor, optional): Per-channel standard deviations [6].
         """
         super().__init__()
         self.climate_channels = climate_channels
         self.climate_features = climate_features
+
+        # Register per-channel normalisation constants as non-trainable buffers
+        # so they are automatically moved to the correct device via .to(device)
+        # and are included in state_dict for checkpoint portability.
+        if input_mean is not None and input_std is not None:
+            mean = torch.as_tensor(input_mean, dtype=torch.float32).view(1, 1, climate_channels, 1, 1)
+            std  = torch.as_tensor(input_std,  dtype=torch.float32).view(1, 1, climate_channels, 1, 1)
+            self.register_buffer("input_mean", mean)
+            self.register_buffer("input_std",  std)
+        else:
+            self.register_buffer("input_mean", None)
+            self.register_buffer("input_std",  None)
         self.geo_channels = geo_channels
         self.geo_features = geo_features
         self.cal_channels = cal_channels
@@ -455,8 +476,20 @@ class ClimateInputEncoder(nn.Module):
                 f"geography spatial dimensions ({geo_h}, {geo_w}) do not match climate ({h}, {w})"
             )
 
+     
+        # 0. Normalise raw physical inputs to zero-mean unit-variance per channel.
+        #    Without this, msl (~101325 Pa) is 30,000x larger than tp (~2.5 mm/day)
+        #    and the network learns the persistence shortcut (dS~0) instead of genuine
+        #    atmospheric dynamics.
+        if self.input_mean is not None and self.input_std is not None:
+            mean = self.input_mean.to(device=climate.device, dtype=climate.dtype)
+            std  = self.input_std.to(device=climate.device, dtype=climate.dtype)
+            climate_in = (climate - mean) / (std + 1e-6)
+        else:
+            climate_in = climate
+
         # 1. Project dynamic climate variables -> [B, T, 32, H, W]
-        c_feat = self.climate_proj(climate)
+        c_feat = self.climate_proj(climate_in)
 
         # 2. Project static geographic variables -> [B, T, 8, H, W]
         g_feat = self.geo_proj(geography, seq_len=t)

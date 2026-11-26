@@ -49,13 +49,23 @@ def get_sample_input(sample_idx: int = 5900) -> tuple[np.ndarray, list[float]]:
     return window, cal
 
 
+def is_port_open(host: str = "127.0.0.1", port: int = 8000, timeout: float = 0.15) -> bool:
+    """Quickly check if the inference server port is actively listening."""
+    import socket
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except (socket.timeout, ConnectionRefusedError, OSError):
+        return False
+
+
 def call_engine_simulate(
     init_states: np.ndarray,
     doy: list[float],
     steps: int,
     pert: Optional[np.ndarray] = None,
 ) -> tuple[np.ndarray, float]:
-    """Call the live inference engine /simulate endpoint."""
+    """Call the live inference engine /simulate endpoint with instant fallback."""
     payload = {
         "init_states": init_states.tolist(),
         "doy_sincos": doy,
@@ -63,15 +73,17 @@ def call_engine_simulate(
         "perturbation": pert.tolist() if pert is not None else None,
     }
 
-    try:
-        resp = requests.post(f"{SERVE_URL}/simulate", json=payload, timeout=10.0)
-        if resp.status_code == 200:
-            res = resp.json()
-            return np.array(res["rollout"], dtype="f4"), float(res.get("inference_ms", 120.0))
-    except Exception as e:
-        print(f"[Dashboard] Engine call to {SERVE_URL} failed ({e}), using in-process fallback...")
+    # If serve.py is running on port 8000, call it directly
+    if is_port_open("127.0.0.1", 8000, timeout=0.15):
+        try:
+            resp = requests.post(f"{SERVE_URL}/simulate", json=payload, timeout=5.0)
+            if resp.status_code == 200:
+                res = resp.json()
+                return np.array(res["rollout"], dtype="f4"), float(res.get("inference_ms", 120.0))
+        except Exception as e:
+            print(f"[Dashboard] HTTP call to {SERVE_URL} failed: {e}")
 
-    # Standalone in-process fallback if serve.py is not yet running
+    # Instant in-process fallback if serve.py is not running separately
     from serve import simulate
     import time
     t0 = time.perf_counter()
