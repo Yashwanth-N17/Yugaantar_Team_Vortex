@@ -346,10 +346,25 @@
             { name: "Total Column Water Vapor", unit: "kg/m²", offset: 0, min: 5, max: 65, colors: ["#f7fcf5", "#c7e9c0", "#74c476", "#238b45", "#00441b"] }
         ];
 
+        function showLoadingOnCanvas(msg = "Computing climate trajectory...") {
+            const canvas = document.getElementById("climateMap");
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#0a0e17";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#38bdf8";
+            ctx.font = "14px 'Inter', system-ui, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(msg, canvas.width / 2, canvas.height / 2 - 10);
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "12px 'Inter', system-ui, sans-serif";
+            ctx.fillText("Simulating 6 atmospheric channels over India...", canvas.width / 2, canvas.height / 2 + 15);
+        }
+
         async function runSimulation() {
             const mode = document.getElementById("simMode").value;
             const steps = parseInt(document.getElementById("stepSelect").value);
             const t0 = performance.now();
+            showLoadingOnCanvas(`Running ${mode === 'prime' ? 'Timeline Prime' : 'Multiverse Shock'}...`);
 
             try {
                 const resp = await fetch("/api/simulate", {
@@ -357,6 +372,9 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ mode: mode, steps: steps })
                 });
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${await resp.text()}`);
+                }
                 const data = await resp.json();
                 currentRollout = data.rollout;
                 baselineRollout = data.baseline;
@@ -370,6 +388,14 @@
                 updateVisualization();
             } catch (err) {
                 console.error("Simulation error:", err);
+                const canvas = document.getElementById("climateMap");
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#0a0e17";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#ef4444";
+                ctx.font = "13px system-ui";
+                ctx.textAlign = "center";
+                ctx.fillText(`Error: ${err.message}`, canvas.width / 2, canvas.height / 2);
             }
         }
 
