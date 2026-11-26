@@ -52,9 +52,13 @@ class TestTrainedModelEvaluation(unittest.TestCase):
         with open(self.stats_path, "r") as f:
             stats = json.load(f)
         self.channel_scales = stats["std"]
+        self.channel_means = stats["mean"]
 
-        # Load model and weights
-        self.model = MultiverseOfMonsoonModel(channel_scales=self.channel_scales).to(self.device)
+        # Load model and weights — must pass channel_means so Block1 buffers match the checkpoint
+        self.model = MultiverseOfMonsoonModel(
+            channel_scales=self.channel_scales,
+            channel_means=self.channel_means,
+        ).to(self.device)
         state_dict = torch.load(self.weights_path, map_location=self.device)
         self.model.load_state_dict(state_dict)
         self.model.eval()

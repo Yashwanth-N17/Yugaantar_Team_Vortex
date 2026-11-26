@@ -100,121 +100,135 @@ def train_model(
     device_name: str = "cpu",
     output_weights: str = "weights.pt",
     output_static: str = "static.pt",
+    static_out: Optional[str] = None,
 ) -> MultiverseOfMonsoonModel:
-    """Train the MultiverseOfMonsoonModel on the provided climate dataset."""
-    device = torch.device(device_name)
-    print(f"--- Training Multiverse of Monsoon on {device} ---")
-    print(f"Dataset path: {nc_path}")
-    print(f"Stats path:   {stats_path}")
+    """Train MultiverseOfMonsoonModel using normalised-delta loss.
 
-    # Load dataset dimensions
+    Key improvements over the initial run:
+    1. Block 1 normalises physical inputs (zero-mean, unit-std per channel) so that
+       msl (~101325 Pa) cannot overpower tp (~2.5 mm/day) in the first convolution.
+    2. Loss is computed on NORMALISED DELTAS (next_state - current_state) / std, 
+       forcing the model to learn genuine atmospheric movement rather than the 
+       persistence shortcut (delta ~ 0).
+    3. A small absolute-state term (5%) prevents unbounded drift over rollouts.
+    """
+    output_static = output_static or "static.pt"
+    device = torch.device(device_name)
+    print(f"--- Training Multiverse of Monsoon (normalised-delta mode) on {device} ---")
+    print(f"Dataset: {nc_path}  |  Stats: {stats_path}")
+
     with h5py.File(nc_path, "r") as f:
         total_days = f["data"].shape[0]
         static_geo = torch.from_numpy(f["static"][:]).float().to(device)
 
-    # Save static geography tensor for serve.py bundle
     torch.save(static_geo, output_static)
     np.save("static.npy", static_geo.cpu().numpy())
-    print(f"Saved bundled static geography to {output_static} and static.npy")
+    print(f"Saved static geography to {output_static}")
 
     train_days = int(total_days * train_split_ratio)
-    val_days = total_days - train_days
-    print(f"Chronological split: {train_days} training days, {val_days} validation days")
+    val_days   = total_days - train_days
+    print(f"Chronological split: {train_days} train days, {val_days} val days")
 
-    train_dataset = ClimateDataset(
-        nc_path=Path(nc_path),
-        stats_path=Path(stats_path),
-        start_idx=0,
-        end_idx=train_days,
-    )
-    val_dataset = ClimateDataset(
-        nc_path=Path(nc_path),
-        stats_path=Path(stats_path),
-        start_idx=train_days,
-        end_idx=total_days,
-    )
+    train_dataset = ClimateDataset(nc_path=Path(nc_path), stats_path=Path(stats_path),
+                                    start_idx=0, end_idx=train_days)
+    val_dataset   = ClimateDataset(nc_path=Path(nc_path), stats_path=Path(stats_path),
+                                    start_idx=train_days, end_idx=total_days)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,  drop_last=True)
+    val_loader   = DataLoader(val_dataset,   batch_size=batch_size, shuffle=False)
     print(f"Train samples: {len(train_dataset)}, Val samples: {len(val_dataset)}")
 
-    # Instantiate model with channel standard deviation scales from stats.json
     with open(stats_path, "r") as f:
         stats = json.load(f)
+    channel_means  = stats["mean"]
     channel_scales = stats["std"]
 
-    model = MultiverseOfMonsoonModel(channel_scales=channel_scales).to(device)
+    # Pass both means and stds so Block 1 can standardise inputs internally
+    model = MultiverseOfMonsoonModel(
+        channel_scales=channel_scales,
+        channel_means=channel_means,
+    ).to(device)
+
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-    # Weighted loss: normalize channels by 1 / (std^2) so all variables contribute equally
-    channel_weights = (1.0 / (torch.tensor(channel_scales, device=device) ** 2)).view(1, NC, 1, 1)
+    std_t   = torch.tensor(channel_scales, device=device, dtype=torch.float32)
+    inv_var = (1.0 / (std_t ** 2)).view(1, NC, 1, 1)
 
     best_val_loss = float("inf")
 
     for epoch in range(1, epochs + 1):
         model.train()
         total_train_loss = 0.0
-        num_train_batches = 0
+        n_batches = 0
 
         for windows, targets, calendars in train_loader:
-            windows = windows.to(device)      # [B, 3, 6, 32, 36]
-            targets = targets.to(device)      # [B, 6, 32, 36]
-            calendars = calendars.to(device)  # [B, 2]
+            windows   = windows.to(device)
+            targets   = targets.to(device)
+            calendars = calendars.to(device)
 
             optimizer.zero_grad()
 
-            # Predict next climate state through complete 6-block pipeline
-            preds = model(windows, static_geo, calendars)
+            current    = windows[:, -1]
+            true_delta = targets - current
+            pred_next  = model(windows, static_geo, calendars)
+            pred_delta = pred_next - current
 
-            # Standardized MSE loss
-            diff = (preds - targets) ** 2
-            loss = (diff * channel_weights).mean()
+            # Normalise deltas by per-channel std: forces learning of dynamics
+            norm_true = true_delta / (std_t.view(1, NC, 1, 1) + 1e-6)
+            norm_pred = pred_delta / (std_t.view(1, NC, 1, 1) + 1e-6)
+            loss_delta = ((norm_pred - norm_true) ** 2).mean()
 
-            # Autograd backward pass
+            # Small absolute-state term (5%) prevents drift
+            loss_state = (inv_var * (pred_next - targets) ** 2).mean()
+            loss = 0.95 * loss_delta + 0.05 * loss_state
+
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
-
             total_train_loss += loss.item()
-            num_train_batches += 1
+            n_batches += 1
 
         scheduler.step()
-        avg_train_loss = total_train_loss / max(1, num_train_batches)
+        avg_train_loss = total_train_loss / max(1, n_batches)
 
-        # Validation loop
         model.eval()
         total_val_loss = 0.0
-        num_val_batches = 0
-        channel_errors = torch.zeros(NC, device=device)
+        n_val = 0
+        channel_rmse = torch.zeros(NC, device=device)
 
         with torch.no_grad():
             for windows, targets, calendars in val_loader:
-                windows = windows.to(device)
-                targets = targets.to(device)
+                windows   = windows.to(device)
+                targets   = targets.to(device)
                 calendars = calendars.to(device)
 
-                preds = model(windows, static_geo, calendars)
-                diff = (preds - targets) ** 2
-                loss = (diff * channel_weights).mean()
+                current    = windows[:, -1]
+                true_delta = targets - current
+                pred_next  = model(windows, static_geo, calendars)
+                pred_delta = pred_next - current
 
-                # Track unnormalized RMSE per channel
-                channel_rmse = torch.sqrt(diff.mean(dim=(0, 2, 3)))
-                channel_errors += channel_rmse
+                norm_true = true_delta / (std_t.view(1, NC, 1, 1) + 1e-6)
+                norm_pred = pred_delta / (std_t.view(1, NC, 1, 1) + 1e-6)
+                loss_delta = ((norm_pred - norm_true) ** 2).mean()
+                loss_state = (inv_var * (pred_next - targets) ** 2).mean()
+                loss = 0.95 * loss_delta + 0.05 * loss_state
 
+                per_ch = torch.sqrt(((pred_next - targets) ** 2).mean(dim=(0, 2, 3)))
+                channel_rmse += per_ch
                 total_val_loss += loss.item()
-                num_val_batches += 1
+                n_val += 1
 
-        avg_val_loss = total_val_loss / max(1, num_val_batches)
-        avg_channel_rmse = (channel_errors / max(1, num_val_batches)).cpu().tolist()
+        avg_val_loss = total_val_loss / max(1, n_val)
+        avg_rmse = (channel_rmse / max(1, n_val)).cpu().tolist()
 
         print(
             f"Epoch {epoch:2d}/{epochs:2d} | "
             f"Train Loss: {avg_train_loss:.5f} | "
             f"Val Loss: {avg_val_loss:.5f} | "
-            f"t2m RMSE: {avg_channel_rmse[0]:.2f}K | "
-            f"tp RMSE: {avg_channel_rmse[1]:.2f}mm"
+            f"t2m RMSE: {avg_rmse[0]:.3f} K | "
+            f"tp RMSE: {avg_rmse[1]:.3f} mm | "
+            f"msl RMSE: {avg_rmse[4]:.1f} Pa"
         )
 
         if avg_val_loss < best_val_loss:
@@ -222,19 +236,18 @@ def train_model(
             torch.save(model.state_dict(), output_weights)
             print(f"  --> Saved new best checkpoint to {output_weights}")
 
-    print("--- Training Complete ---")
-    print(f"Final model weights saved to {output_weights}")
+    print(f"--- Training Complete. Best val loss: {best_val_loss:.5f} ---")
     return model
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Multiverse of Monsoon model")
-    parser.add_argument("--nc", type=str, default="hackdata/india_climate_train.nc")
-    parser.add_argument("--stats", type=str, default="hackdata/stats.json")
-    parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--out", type=str, default="weights.pt")
+    parser.add_argument("--nc",         type=str,   default="hackdata/india_climate_train.nc")
+    parser.add_argument("--stats",      type=str,   default="hackdata/stats.json")
+    parser.add_argument("--epochs",     type=int,   default=5)
+    parser.add_argument("--batch-size", type=int,   default=32)
+    parser.add_argument("--lr",         type=float, default=1e-3)
+    parser.add_argument("--out",        type=str,   default="weights.pt")
     args = parser.parse_args()
 
     train_model(
