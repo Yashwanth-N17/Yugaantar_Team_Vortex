@@ -23,12 +23,21 @@ import numpy as np
 import torch
 import uvicorn
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from monsoon_r1.contract import CHANNELS, NC, NLAT, NLON, SCORE_STEPS, T_IN, MAX_STEPS
 from monsoon_r1.models.multiverse_model import MultiverseOfMonsoonModel
 
 app = FastAPI(title="Multiverse of Monsoon AI Engine", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 MODEL_NAME = "multiverse-of-monsoon-r1"
 DEVICE = torch.device("cpu")

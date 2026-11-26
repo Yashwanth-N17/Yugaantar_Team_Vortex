@@ -22,7 +22,15 @@ import time
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-import netCDF4
+try:
+    import netCDF4
+    def open_dataset(path):
+        return netCDF4.Dataset(path, "r")
+except ImportError:
+    import h5py
+    def open_dataset(path):
+        return h5py.File(path, "r")
+
 import numpy as np
 import requests
 import torch
@@ -95,26 +103,31 @@ def evaluate_model(
         sys.exit(1)
 
     # 3. Load Real Climate Dataset
-    with netCDF4.Dataset(nc_path, "r") as ds:
+    with open_dataset(nc_path) as ds:
         data = ds["data"][:]
         times = ds["time"][:]
 
     total_days = data.shape[0]
+    base_date = dt.date(2005, 1, 1)
+    all_dates = [base_date + dt.timedelta(days=int(t)) for t in times]
+
+    # Verify or dynamically resolve holdout_start_idx (Year 2021)
+    if holdout_start_idx is None:
+        holdout_start_idx = next(i for i, d in enumerate(all_dates) if d.year >= 2021)
+
     train_data = data[:holdout_start_idx]
     train_dates = np.array([
-        int(dt.datetime.fromtimestamp(t * 86400, dt.timezone.utc).strftime("%Y%m%d"))
-        for t in times[:holdout_start_idx]
+        int(d.strftime("%Y%m%d"))
+        for d in all_dates[:holdout_start_idx]
     ])
 
-    print(f"    Computing day-of-year climatology over training set ({len(train_data)} days)...")
+    print(f"    Pre-holdout archive: {all_dates[0]} to {all_dates[holdout_start_idx - 1]} ({len(train_data)} days)")
+    print(f"    Computing day-of-year climatology over pre-holdout archive ({len(train_data)} days)...")
     clim = climatology(train_data, train_dates)
 
     holdout_data = data[holdout_start_idx:]
-    holdout_dates = [
-        dt.datetime.fromtimestamp(t * 86400, dt.timezone.utc).date()
-        for t in times[holdout_start_idx:]
-    ]
-    print(f"    Holdout set: {len(holdout_data)} days (2021-01-01 to 2021-12-31)")
+    holdout_dates = all_dates[holdout_start_idx:]
+    print(f"    Holdout set: {len(holdout_data)} days ({holdout_dates[0]} to {holdout_dates[-1]})")
 
     # Test Latency via HTTP on first sample
     test_w = holdout_data[0:3]

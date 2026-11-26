@@ -18,7 +18,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import unittest
-import netCDF4
+try:
+    import netCDF4
+    def open_nc(path):
+        return netCDF4.Dataset(path, "r")
+except ImportError:
+    import h5py
+    def open_nc(path):
+        return h5py.File(path, "r")
 import numpy as np
 import torch
 
@@ -79,7 +86,7 @@ class TestTrainedModelEvaluation(unittest.TestCase):
 
     def test_02_real_data_one_step_prediction(self) -> None:
         """Evaluate 1-step prediction on real held-out climate sequence from hackdata."""
-        with netCDF4.Dataset(self.nc_path, "r") as f:
+        with open_nc(self.nc_path) as f:
             # Pick a sample window from the validation period (e.g. index 5500)
             sample_idx = 5500
             window_np = f["data"][sample_idx : sample_idx + T_IN]  # [3, 6, 32, 36]
@@ -109,7 +116,7 @@ class TestTrainedModelEvaluation(unittest.TestCase):
 
     def test_03_ten_day_rollout_physical_validity_gate(self) -> None:
         """Verify that a 10-day autoregressive rollout on real data passes the validity gate."""
-        with netCDF4.Dataset(self.nc_path, "r") as f:
+        with open_nc(self.nc_path) as f:
             sample_idx = 6000
             window_np = f["data"][sample_idx : sample_idx + T_IN]  # [3, 6, 32, 36]
 
@@ -133,7 +140,7 @@ class TestTrainedModelEvaluation(unittest.TestCase):
 
     def test_04_counterfactual_shock_response(self) -> None:
         """Test response to a localized physical shock in Bay of Bengal on real data."""
-        with netCDF4.Dataset(self.nc_path, "r") as f:
+        with open_nc(self.nc_path) as f:
             sample_idx = 5800
             window_np = f["data"][sample_idx : sample_idx + T_IN]
 
@@ -171,7 +178,7 @@ class TestTrainedModelEvaluation(unittest.TestCase):
 
     def test_05_null_perturbation_invariance(self) -> None:
         """Test that zero perturbation shock yields deterministic invariant rollout."""
-        with netCDF4.Dataset(self.nc_path, "r") as f:
+        with open_nc(self.nc_path) as f:
             sample_idx = 5700
             window_np = f["data"][sample_idx : sample_idx + T_IN]
 

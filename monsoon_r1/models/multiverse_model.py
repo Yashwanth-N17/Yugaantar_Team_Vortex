@@ -100,6 +100,7 @@ class MultiverseOfMonsoonModel(nn.Module):
             if block6 is not None
             else ResidualStateTransition(
                 channel_scales=channel_scales,
+                channel_means=channel_means,
                 state_is_normalized=state_is_normalized,
             )
         )
