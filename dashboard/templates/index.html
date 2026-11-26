@@ -702,12 +702,12 @@
         const LON_MAX = 100.5;
 
         const CHANNEL_CONFIG = [
-            { name: "2m Temperature", unit: "°C", isTemp: true, min: 20, max: 35, diverging: false },
-            { name: "Precipitation", unit: "mm/day", isRain: true, min: 0, max: 15, diverging: false },
+            { name: "2m Temperature", unit: "°C", isTemp: true, min: 0, max: 40, diverging: false },
+            { name: "Precipitation", unit: "mm/day", isRain: true, min: 0, max: 60, diverging: false },
             { name: "10m Eastward Wind", unit: "m/s", min: -5, max: 15, diverging: true },
             { name: "10m Northward Wind", unit: "m/s", min: -5, max: 10, diverging: true },
-            { name: "MSL Pressure", unit: "hPa", isMsl: true, min: 995, max: 1025, diverging: false },
-            { name: "Total Column Water Vapour", unit: "kg/m²", min: 25, max: 65, diverging: false }
+            { name: "MSL Pressure", unit: "hPa", isMsl: true, min: 990, max: 1018, diverging: false },
+            { name: "Total Column Water Vapour", unit: "kg/m²", min: 5, max: 75, diverging: false }
         ];
 
         let state = {
