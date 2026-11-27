@@ -215,4 +215,4 @@ Open **`http://localhost:8501`** in any web browser.
 | **Physical validity gate** | ✅ | Verified $TP \ge 0$, bounded $T_{2m}$, no NaN/Inf |
 | **Causal shocks & null invariance** | ✅ | Shocks propagate coherently; zero shock changes nothing |
 | **Interactive Dashboard & Impact Extension**| ✅ | Separate dashboard in `dashboard/` coupled live to `/simulate` |
-| **Official 2-Page Brief PDF** | ✅ | `Multiverse_of_Monsoon_Brief.pdf` (strict 2 pages) in root and `docs/` |
+| **Official 2-Page Brief PDF** | ✅ | `Multiverse_of_Monsoon_Brief.pdf` (strict 2 pages) in repository root |
