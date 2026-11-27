@@ -45,7 +45,13 @@ DEVICE = torch.device("cpu")
 # Paths to model weights and static assets
 ROOT_DIR = Path(__file__).resolve().parent
 WEIGHTS_PATH = ROOT_DIR / "weights.pt"
+if not WEIGHTS_PATH.exists():
+    WEIGHTS_PATH = ROOT_DIR / "checkpoints" / "weights.pt"
+
 STATIC_PATH = ROOT_DIR / "static.pt"
+if not STATIC_PATH.exists():
+    STATIC_PATH = ROOT_DIR / "hackdata" / "static.pt"
+
 STATS_PATH = ROOT_DIR / "hackdata" / "stats.json"
 
 # Load normalization scales and means if present

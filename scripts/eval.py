@@ -22,6 +22,10 @@ import time
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 try:
     import netCDF4
     def open_dataset(path):

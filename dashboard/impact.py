@@ -73,7 +73,9 @@ def get_land_mask() -> np.ndarray:
             except Exception:
                 pass
         if _LAND_MASK is None:
-            static_npy = Path(__file__).resolve().parent.parent / "static.npy"
+            static_npy = Path(__file__).resolve().parent.parent / "hackdata" / "static.npy"
+            if not static_npy.exists():
+                static_npy = Path(__file__).resolve().parent.parent / "static.npy"
             if static_npy.exists():
                 try:
                     geo = np.load(static_npy)

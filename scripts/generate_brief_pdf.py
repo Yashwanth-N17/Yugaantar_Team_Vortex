@@ -5,6 +5,7 @@ Page 2: Visualization dashboard, impact extension, and policy co-pilot.
 """
 
 from pathlib import Path
+import shutil
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -18,9 +19,10 @@ from reportlab.platypus import (
     KeepTogether,
 )
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 def create_brief_pdf(filename: str = "Multiverse_of_Monsoon_Brief.pdf") -> str:
-    pdf_path = Path(filename).resolve()
+    pdf_path = (ROOT_DIR / filename).resolve()
     doc = SimpleDocTemplate(
         str(pdf_path),
         pagesize=letter,

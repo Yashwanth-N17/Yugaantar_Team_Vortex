@@ -1,7 +1,14 @@
 """Verify serve.py using the official monsoon_r1.schema_validator."""
 
+import sys
 import threading
 import time
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 import uvicorn
 from serve import app
 from monsoon_r1 import schema_validator
