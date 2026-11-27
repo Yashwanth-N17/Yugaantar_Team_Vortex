@@ -22,9 +22,7 @@ from reportlab.platypus import (
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 def create_brief_pdf(filename: str = "Multiverse_of_Monsoon_Brief.pdf") -> str:
-    docs_dir = ROOT_DIR / "docs"
-    docs_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = (docs_dir / filename).resolve()
+    pdf_path = (ROOT_DIR / filename).resolve()
     doc = SimpleDocTemplate(
         str(pdf_path),
         pagesize=letter,
@@ -374,8 +372,6 @@ def create_brief_pdf(filename: str = "Multiverse_of_Monsoon_Brief.pdf") -> str:
     )
 
     doc.build(story)
-    root_pdf = (ROOT_DIR / filename).resolve()
-    shutil.copy2(pdf_path, root_pdf)
     print(f"Successfully generated 2-page brief PDF at: {pdf_path}")
     return str(pdf_path)
 

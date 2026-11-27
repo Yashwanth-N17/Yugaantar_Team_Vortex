@@ -1,7 +1,6 @@
 # 🌌 Multiverse of Monsoon: Earth-System Digital Twin & Climate Simulation Engine
 
 [![Tests](https://img.shields.io/badge/tests-110%20passed-brightgreen.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)]()
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.15%20(CPU)-orange.svg)]()
 
@@ -170,16 +169,6 @@ Open **`http://localhost:8501`** in any web browser.
 ├── static.pt                        # Bundled static geography tensor [2, 32, 36]
 ├── README.md                        # Comprehensive documentation and user guide
 ├── pyproject.toml                   # Project metadata and dependencies
-├── LICENSE / NOTICE                 # MIT licensing terms
-├── docs/                            # In-depth block-by-block technical documentation
-│   ├── BLOCK_1_CLIMATE_INPUT_ENCODER.md
-│   ├── BLOCK_2_MULTI_SCALE_SPATIAL_ENCODER.md
-│   ├── BLOCK_3_TEMPORAL_DYNAMICS_ENCODER.md
-│   ├── BLOCK_4_SPATIAL_CONTEXT_ATTENTION.md
-│   ├── BLOCK_5_FORECAST_DECODER.md
-│   ├── BLOCK_6_RESIDUAL_STATE_TRANSITION.md
-│   ├── R1_CONTRACT.md
-│   └── Multiverse_of_Monsoon_Brief.pdf
 ├── scripts/                         # Offline evaluation and development tooling
 │   ├── eval.py                      # Comprehensive holdout evaluation & benchmark suite
 │   ├── generate_brief_pdf.py        # Reproducible 2-page brief PDF generator
