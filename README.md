@@ -165,10 +165,15 @@ Open **`http://localhost:8501`** in any web browser.
 ```
 ├── serve.py                         # Official offline inference server (FastAPI/uvicorn, port 8000)
 ├── train.py                         # Model training script
+├── eval.py                          # Comprehensive offline evaluation & verification suite
+├── Multiverse_of_Monsoon_Brief.pdf  # Official 2-page brief PDF (model architecture, failure modes & dashboard)
+├── brief.pdf                        # Official 2-page brief PDF copy
+├── generate_brief_pdf.py            # Reproducible brief PDF generation script
 ├── weights.pt                       # Trained PyTorch model checkpoint (1.57 MB)
 ├── static.pt                        # Bundled static geography tensor [2, 32, 36]
+├── static.npy                       # NumPy static geography array
 ├── verify_server.py                 # Automated API contract & schema validation runner
-├── README.md                        # Documentation and user guide
+├── README.md                        # Comprehensive documentation and user guide
 ├── hackdata/
 │   ├── india_climate_train.nc       # ERA5 daily climate observations (2005–2021)
 │   ├── stats.json                   # Normalization means and standard deviations
@@ -209,3 +214,4 @@ Open **`http://localhost:8501`** in any web browser.
 | **Physical validity gate** | ✅ | Verified $TP \ge 0$, bounded $T_{2m}$, no NaN/Inf |
 | **Causal shocks & null invariance** | ✅ | Shocks propagate coherently; zero shock changes nothing |
 | **Interactive Dashboard & Impact Extension**| ✅ | Separate dashboard in `dashboard/` coupled live to `/simulate` |
+| **Official 2-Page Brief PDF** | ✅ | `Multiverse_of_Monsoon_Brief.pdf` and `brief.pdf` included in repo root |

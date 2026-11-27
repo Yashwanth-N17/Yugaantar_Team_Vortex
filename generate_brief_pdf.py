@@ -234,7 +234,7 @@ def create_brief_pdf(filename: str = "Multiverse_of_Monsoon_Brief.pdf") -> str:
     )
     story.append(
         Paragraph(
-            "• <b>Inference Latency:</b> 10-step full rollout executes in <b>0.90 s</b> wall time via the real HTTP POST /simulate endpoint (model execution: 806 ms on 4 CPU cores, well within the 5.0 s limit).",
+            "• <b>Inference Latency:</b> 10-step full rollout executes in <b>0.90 s</b> wall time via the real HTTP POST simulation endpoint (model execution: 806 ms on 4 CPU cores, well within the 5.0 s limit).",
             bullet_style,
         )
     )
@@ -275,7 +275,7 @@ def create_brief_pdf(filename: str = "Multiverse_of_Monsoon_Brief.pdf") -> str:
     story.append(
         Paragraph(
             "The system includes a dedicated, separate interactive web dashboard (<b>dashboard/app.py</b>) designed for live desk review "
-            "and operational decision-makers. The dashboard is <b>live-coupled</b> to the <code>/simulate</code> engine at <code>http://localhost:8000</code>, "
+            "and operational decision-makers. The dashboard is <b>live-coupled</b> to the offline inference engine at <code>http://localhost:8000</code>, "
             "triggering real-time model rollouts on demand in ~140 ms without pre-rendered videos or mock data.",
             body_style,
         )

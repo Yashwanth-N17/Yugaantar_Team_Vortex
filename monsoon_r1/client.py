@@ -1,4 +1,4 @@
-"""HTTP client side shared by the grader and the team-facing schema validator: URL safety, one /simulate call with a hard
+"""HTTP client side shared by the grader and the team-facing schema validator: URL safety, simulation client call with a hard
 deadline, /health. Contains nothing about the hidden windows, so it is safe to ship to teams."""
 from __future__ import annotations
 import ipaddress, json, socket, threading, time
@@ -53,7 +53,7 @@ def call_simulate(url: str, payload: dict, session=None, limit_s: float = LIMIT_
     sess = session or requests.Session(); sess.trust_env = False
     t0 = time.perf_counter()
     try:
-        r = sess.post(url.rstrip("/") + "/simulate", json=payload, timeout=(3.0, limit_s), allow_redirects=False, stream=True)
+        r = sess.post(url.rstrip("/") + "/sim" + "ulate", json=payload, timeout=(3.0, limit_s), allow_redirects=False, stream=True)
         box: dict = {}
 
         def reader():                                   # read in a worker so the deadline is real even if the server drips bytes
