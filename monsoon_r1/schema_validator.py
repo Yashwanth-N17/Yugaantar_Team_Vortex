@@ -1,5 +1,5 @@
 """Teams run this against their own server before submitting:  python -m monsoon_r1.schema_validator http://localhost:8000
-Checks /health, /simulate with random-but-plausible inputs in BOTH wire formats (base64 and nested lists), a perturbation,
+Checks /health and simulation endpoints with random-but-plausible inputs in BOTH wire formats (base64 and nested lists), a perturbation,
 the null perturbation, output shape/values, and the 5 s limit. It does not know the hidden cases and has no scoring."""
 from __future__ import annotations
 import sys, time

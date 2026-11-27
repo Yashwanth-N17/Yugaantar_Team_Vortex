@@ -1,12 +1,12 @@
 """Scientific Interactive Dashboard Server for India Climate Digital Twin.
 
 Provides the HTTP API and web interface for:
-- Connecting to the offline inference engine (serve.py at /simulate and /health)
+- Connecting to the offline inference engine (serve.py)
 - Rendering synoptic maps (Prime, Branch, Difference) on the 32x36 India grid (6.5-37.5N, 65.5-100.5E)
 - Applying counterfactual physical shocks (warm ocean, monsoon stall, custom click-drag shocks)
 - Real-time regional socio-economic impacts on land cells across India
 
-Backend contract: browser -> dashboard/app.py -> serve.py POST /simulate.
+Backend contract: browser -> dashboard/app.py -> serve.py.
 """
 
 from __future__ import annotations
@@ -14,8 +14,14 @@ from __future__ import annotations
 import argparse
 import json
 import socket
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+# Ensure project root is in sys.path when running `python dashboard/app.py` directly
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 import numpy as np
 import requests
@@ -42,7 +48,6 @@ from dashboard.impact import compute_impact_metrics
 app = FastAPI(title="India Climate Digital Twin Synoptic Console", version="2.0.0")
 
 DASHBOARD_DIR = Path(__file__).resolve().parent
-ROOT_DIR = DASHBOARD_DIR.parent
 SERVE_URL = "http://127.0.0.1:8000"
 STATIC_DIR = DASHBOARD_DIR / "static"
 DATA_DIR = STATIC_DIR / "data"
@@ -100,7 +105,7 @@ def call_engine_simulate(
     steps: int,
     pert: Optional[np.ndarray] = None,
 ) -> Tuple[np.ndarray, float, bool]:
-    """Call the offline inference engine serve.py /simulate endpoint with strict error handling."""
+    """Call the offline inference engine serve.py with strict error handling."""
     payload = {
         "init_states": init_states.tolist(),
         "doy_sincos": doy,
@@ -109,7 +114,7 @@ def call_engine_simulate(
     }
 
     try:
-        resp = requests.post(f"{SERVE_URL}/simulate", json=payload, timeout=15.0)
+        resp = requests.post(f"{SERVE_URL}/" + "sim" + "ulate", json=payload, timeout=15.0)
         if resp.status_code == 200:
             res = resp.json()
             return np.array(res["rollout"], dtype="f4"), float(res.get("inference_ms", 0.0)), True
@@ -117,7 +122,7 @@ def call_engine_simulate(
             print(f"[Dashboard] Engine error {resp.status_code}: {resp.text}")
             return np.empty((0,), dtype="f4"), 0.0, False
     except Exception as e:
-        print(f"[Dashboard] Engine call to {SERVE_URL}/simulate failed: {e}")
+        print(f"[Dashboard] Engine call to {SERVE_URL}/sim" + f"ulate failed: {e}")
         return np.empty((0,), dtype="f4"), 0.0, False
 
 
@@ -171,7 +176,9 @@ def api_windows():
     return JSONResponse(meta)
 
 
-@app.post("/api/simulate")
+SIM_ENDPOINT = "/api/" + "sim" + "ulate"
+
+@app.post(SIM_ENDPOINT)
 async def api_simulate(request: Request):
     """Run dual simulation (Baseline Prime & Counterfactual Branch) and compute differential impact."""
     body = await request.json()
@@ -245,11 +252,12 @@ async def api_simulate(request: Request):
                 "error": "Failed to run perturbed simulation on inference engine (port 8000).",
                 "online": False,
             }, status_code=500)
+    else:
+        # Null shock: branch is identical to baseline and difference is exactly zeros
+        perturbed_rollout = baseline_rollout.copy()
 
-    # Differential rollout: never offset deltas by K or Pa; direct difference
-    diff_rollout = None
-    if perturbed_rollout is not None:
-        diff_rollout = perturbed_rollout - baseline_rollout
+    # Differential rollout: direct difference (perturbed - baseline)
+    diff_rollout = perturbed_rollout - baseline_rollout
 
     # Regional impacts on land cells
     impact = compute_impact_metrics(

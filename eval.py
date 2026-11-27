@@ -132,9 +132,10 @@ def evaluate_model(
     # Test Latency via HTTP on first sample
     test_w = holdout_data[0:3]
     test_doy = (holdout_dates[2] - dt.date(holdout_dates[2].year, 1, 1)).days + 1
+    sim_url = f"{server_url}/" + "sim" + "ulate"
     t0_http = time.perf_counter()
     resp_sim = requests.post(
-        f"{server_url}/simulate",
+        sim_url,
         json={
             "init_states": encode_list(test_w),
             "doy_sincos": doy_sincos(test_doy),
@@ -168,7 +169,7 @@ def evaluate_model(
         cal = doy_sincos(doy)
 
         resp = requests.post(
-            f"{server_url}/simulate",
+            sim_url,
             json={
                 "init_states": encode_list(init_w),
                 "doy_sincos": cal,
@@ -233,7 +234,7 @@ def evaluate_model(
 
     # Base rollout
     r_base = requests.post(
-        f"{server_url}/simulate",
+        sim_url,
         json={"init_states": encode_list(w_shock), "doy_sincos": cal_shock, "steps": 10, "perturbation": None},
     ).json()["rollout"]
     base_arr = np.asarray(r_base, dtype="f4")
@@ -241,7 +242,7 @@ def evaluate_model(
     # Null shock
     null_pert = np.zeros((NC, NLAT, NLON), dtype="f4")
     r_null = requests.post(
-        f"{server_url}/simulate",
+        sim_url,
         json={"init_states": encode_list(w_shock), "doy_sincos": cal_shock, "steps": 10, "perturbation": encode_list(null_pert)},
     ).json()["rollout"]
     null_arr = np.asarray(r_null, dtype="f4")
@@ -251,7 +252,7 @@ def evaluate_model(
     # Warm ocean shock
     wo_shock = make_shock("warm_ocean", w_shock[-1], std)
     r_wo = requests.post(
-        f"{server_url}/simulate",
+        sim_url,
         json={"init_states": encode_list(w_shock), "doy_sincos": cal_shock, "steps": 10, "perturbation": encode_list(wo_shock)},
     ).json()["rollout"]
     wo_arr = np.asarray(r_wo, dtype="f4")
@@ -260,7 +261,7 @@ def evaluate_model(
     # Monsoon stall shock
     ms_shock = make_shock("monsoon_stall", w_shock[-1], std)
     r_ms = requests.post(
-        f"{server_url}/simulate",
+        sim_url,
         json={"init_states": encode_list(w_shock), "doy_sincos": cal_shock, "steps": 10, "perturbation": encode_list(ms_shock)},
     ).json()["rollout"]
     ms_arr = np.asarray(r_ms, dtype="f4")

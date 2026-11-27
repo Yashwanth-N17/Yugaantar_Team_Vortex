@@ -331,115 +331,6 @@
             border: 1px solid rgba(0,0,0,0.12);
         }
 
-        /* Analysis Row (Statistics + Rainfall) */
-        .analysis-row {
-            display: grid;
-            grid-template-columns: 1.1fr 1fr;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        @media (max-width: 900px) {
-            .analysis-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .panel-card {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-hairline);
-            border-radius: 2px;
-            padding: 8px 10px;
-        }
-
-        .panel-title {
-            font-family: 'Source Serif', Georgia, serif;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent-oxford);
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-subtle);
-            padding-bottom: 3px;
-        }
-
-        /* Stats Table */
-        .stats-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10.5px;
-        }
-        .stats-table th {
-            text-align: right;
-            padding: 2px 4px;
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 9.5px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-        .stats-table th:first-child { text-align: left; }
-        .stats-table td {
-            padding: 2px 4px;
-            text-align: right;
-            border-bottom: 1px solid rgba(0,0,0,0.03);
-        }
-        .stats-table td:first-child {
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        /* Rainfall Metric Grid */
-        .rainfall-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 6px;
-        }
-        .rf-cell {
-            background: #fff;
-            border: 1px solid var(--border-subtle);
-            padding: 4px 6px;
-            border-radius: 2px;
-            display: flex;
-            flex-direction: column;
-        }
-        .rf-cell .lbl { font-size: 9px; color: var(--text-muted); }
-        .rf-cell .val { font-size: 11.5px; font-weight: 700; color: var(--accent-oxford); }
-
-        .rf-dist-row {
-            display: flex;
-            gap: 4px;
-            font-size: 9.5px;
-            margin-top: 4px;
-        }
-        .rf-dist-item {
-            flex: 1;
-            background: #fff;
-            border: 1px solid var(--border-subtle);
-            padding: 2px 4px;
-            text-align: center;
-            border-radius: 2px;
-        }
-        .rf-dist-item .sub { font-size: 8.5px; color: var(--text-muted); display: block; }
-
-        /* Forecast Evolution Chart Box */
-        .evolution-chart-box {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-hairline);
-            border-radius: 2px;
-            padding: 8px 10px;
-            flex-shrink: 0;
-        }
-
-        .evolution-chart-box canvas {
-            display: block;
-            width: 100%;
-            height: 105px;
-        }
-
         /* Right: Control Rail */
         .control-rail {
             background-color: var(--bg-panel);
@@ -542,34 +433,6 @@
             margin-bottom: 6px;
         }
 
-        /* Verification Table */
-        .verif-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            font-size: 10.5px;
-        }
-        .verif-cell {
-            background: #fff;
-            border: 1px solid var(--border-subtle);
-            padding: 3px 6px;
-            border-radius: 2px;
-        }
-        .verif-cell.full {
-            grid-column: span 2;
-        }
-        .verif-cell .lbl {
-            font-size: 9px;
-            color: var(--text-muted);
-            display: block;
-        }
-        .verif-cell .val {
-            font-weight: 600;
-            color: var(--text-main);
-        }
-        .verif-cell .val.good { color: var(--success-green); }
-        .verif-cell .val.warn { color: var(--warn-amber); }
-
         /* Spinner */
         .spinner {
             width: 11px;
@@ -582,67 +445,6 @@
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-
-        /* Regional Impact Metrics Cards */
-        .region-card {
-            border: 1px solid var(--border-subtle);
-            background-color: #fff;
-            padding: 5px 7px;
-            border-radius: 2px;
-            margin-bottom: 5px;
-            font-size: 10px;
-        }
-
-        .region-header {
-            font-weight: 600;
-            color: var(--accent-oxford);
-            margin-bottom: 2px;
-            border-bottom: 1px solid var(--border-subtle);
-            padding-bottom: 2px;
-        }
-
-        .region-metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3px;
-        }
-
-        .metric-cell {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .metric-cell span.lbl {
-            font-size: 8.5px;
-            color: var(--text-muted);
-        }
-
-        .metric-cell span.val {
-            font-size: 10.5px;
-            font-weight: 600;
-        }
-
-        .delta-tag {
-            font-size: 9px;
-            font-weight: 600;
-            margin-left: 2px;
-        }
-        .delta-tag.pos { color: var(--success-green); }
-        .delta-tag.neg { color: var(--accent-crimson); }
-        .delta-tag.zero { color: var(--text-muted); }
-
-        /* Advisories */
-        .advisory-box {
-            background-color: #fff;
-            border-left: 3px solid var(--warn-amber);
-            border-top: 1px solid var(--border-subtle);
-            border-right: 1px solid var(--border-subtle);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 5px 7px;
-            font-size: 10px;
-            margin-bottom: 4px;
-            line-height: 1.3;
         }
 
         /* Bottom Time Dock */
@@ -737,6 +539,7 @@
                     <button class="btn-day-jump" id="btn-jump-4" onclick="jumpToDay(4)">D4</button>
                     <button class="btn-day-jump" id="btn-jump-7" onclick="jumpToDay(7)">D7</button>
                     <button class="btn-day-jump" id="btn-jump-10" onclick="jumpToDay(10)">D10</button>
+                    <span id="day-propagation-hint" style="font-size:10px; color:#1a365d; font-weight:600; margin-left:6px; background:#e8f0fe; padding:2px 6px; border-radius:2px; border:1px solid #c2e7ff;">Tip: Jump to D4 or D10 to observe shock spread across India</span>
                 </div>
                 <div class="toolbar-group">
                     <span style="font-size:10.5px; color:var(--text-muted);">Domain: 6.5&ndash;37.5&deg;N, 65.5&ndash;100.5&deg;E (32&times;36)</span>
@@ -781,7 +584,10 @@
                 <div class="map-card">
                     <div class="map-card-header">
                         <span>Difference (&Delta; = Branch &minus; Prime)</span>
-                        <span id="label-step-diff" style="font-size:10px; font-weight:normal; color:var(--text-muted);">Day 1</span>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span id="diff-peak-tag" style="font-size:9.5px; font-weight:700; color:var(--accent-crimson); background:#fff; padding:1px 5px; border-radius:2px; border:1px solid var(--border-subtle);">&Delta; Peak: 0.00</span>
+                            <span id="label-step-diff" style="font-size:10px; font-weight:normal; color:var(--text-muted);">Day 1</span>
+                        </div>
                     </div>
                     <div class="map-viewport" id="viewport-diff">
                         <canvas id="canvas-diff"></canvas>
@@ -804,97 +610,6 @@
                 <div class="colorbar-strip" id="cbar-gradient"></div>
             </div>
 
-            <!-- Analysis Row: Statistics & Rainfall Visualizations -->
-            <div class="analysis-row">
-                <!-- Statistics Panel -->
-                <div class="panel-card">
-                    <div class="panel-title">
-                        <span>Grid Statistics (Day <span id="stat-day-label">1</span>)</span>
-                        <span id="stats-var-title" style="font-size:10px; font-weight:normal; color:var(--text-muted);">tp</span>
-                    </div>
-                    <table class="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Baseline</th>
-                                <th>Branch</th>
-                                <th>&Delta; (Diff)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Minimum</td>
-                                <td id="stat-prime-min" class="num">&mdash;</td>
-                                <td id="stat-branch-min" class="num">&mdash;</td>
-                                <td id="stat-diff-min" class="num">&mdash;</td>
-                            </tr>
-                            <tr>
-                                <td>Maximum</td>
-                                <td id="stat-prime-max" class="num">&mdash;</td>
-                                <td id="stat-branch-max" class="num">&mdash;</td>
-                                <td id="stat-diff-max" class="num">&mdash;</td>
-                            </tr>
-                            <tr>
-                                <td>Mean</td>
-                                <td id="stat-prime-mean" class="num">&mdash;</td>
-                                <td id="stat-branch-mean" class="num">&mdash;</td>
-                                <td id="stat-diff-mean" class="num">&mdash;</td>
-                            </tr>
-                            <tr>
-                                <td>Median</td>
-                                <td id="stat-prime-median" class="num">&mdash;</td>
-                                <td id="stat-branch-median" class="num">&mdash;</td>
-                                <td id="stat-diff-median" class="num">&mdash;</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Rainfall Visualization Panel -->
-                <div class="panel-card">
-                    <div class="panel-title">
-                        <span>Rainfall Analytics (Precipitation tp)</span>
-                        <span style="font-size:10px; font-weight:normal; color:var(--text-muted);">Domain Metrics</span>
-                    </div>
-                    <div class="rainfall-grid">
-                        <div class="rf-cell">
-                            <span class="lbl">Selected Day Mean</span>
-                            <span class="val num" id="rain-day-mean">&mdash; mm</span>
-                        </div>
-                        <div class="rf-cell">
-                            <span class="lbl">Selected Day Peak</span>
-                            <span class="val num" id="rain-day-max">&mdash; mm</span>
-                        </div>
-                        <div class="rf-cell">
-                            <span class="lbl">10-Day Domain Mean</span>
-                            <span class="val num" id="rain-10d-mean">&mdash; mm</span>
-                        </div>
-                        <div class="rf-cell">
-                            <span class="lbl">10-Day Domain Peak</span>
-                            <span class="val num" id="rain-10d-max">&mdash; mm</span>
-                        </div>
-                    </div>
-                    <div style="font-size:9px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Rainfall Distribution (Day <span id="rf-dist-day">1</span>):</div>
-                    <div class="rf-dist-row">
-                        <div class="rf-dist-item"><strong id="rain-dist-trace" class="num">&mdash;</strong><span class="sub">&lt;1mm (Dry)</span></div>
-                        <div class="rf-dist-item"><strong id="rain-dist-light" class="num">&mdash;</strong><span class="sub">1-10mm (Light)</span></div>
-                        <div class="rf-dist-item"><strong id="rain-dist-mod" class="num">&mdash;</strong><span class="sub">10-30mm (Mod)</span></div>
-                        <div class="rf-dist-item"><strong id="rain-dist-heavy" class="num">&mdash;</strong><span class="sub">&gt;30mm (Heavy)</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Forecast Evolution Line Chart -->
-            <div class="evolution-chart-box">
-                <div class="panel-title" style="margin-bottom:4px;">
-                    <span>Forecast Evolution (10-Day Domain Mean Trajectory)</span>
-                    <span style="font-size:10px; font-weight:normal; color:var(--text-muted);">
-                        <span style="color:#1a365d; font-weight:600;">&mdash; Baseline</span> &nbsp;
-                        <span style="color:#9e2a2b; font-weight:600;">--- Perturbed</span>
-                    </span>
-                </div>
-                <canvas id="canvas-forecast-evolution"></canvas>
-            </div>
         </main>
 
         <!-- Right: Control Rail -->
@@ -946,62 +661,7 @@
                 </div>
             </div>
 
-            <!-- Section 2: Model Verification Panel -->
-            <div class="rail-section">
-                <div class="rail-section-title">
-                    <span>Model Verification Panel</span>
-                    <span style="font-size:9px; font-weight:normal; color:var(--text-muted);">Tensor Contract</span>
-                </div>
-
-                <div class="verif-grid">
-                    <div class="verif-cell">
-                        <span class="lbl">Backend Health</span>
-                        <span class="val good" id="verif-health">Connected (:8000)</span>
-                    </div>
-                    <div class="verif-cell">
-                        <span class="lbl">Inference Latency</span>
-                        <span class="val num" id="verif-latency">&mdash; ms</span>
-                    </div>
-                    <div class="verif-cell full">
-                        <span class="lbl">Model Identifier</span>
-                        <span class="val" id="verif-model">multiverse-of-monsoon-r1</span>
-                    </div>
-                    <div class="verif-cell">
-                        <span class="lbl">Rollout Status</span>
-                        <span class="val" id="verif-status">Idle</span>
-                    </div>
-                    <div class="verif-cell">
-                        <span class="lbl">Forecast Horizon</span>
-                        <span class="val" id="verif-horizon">10 Days (10 Steps)</span>
-                    </div>
-                    <div class="verif-cell full">
-                        <span class="lbl">Output Tensor Dimensions</span>
-                        <span class="val num" id="verif-dims">[10, 6, 32, 36]</span>
-                    </div>
-                    <div class="verif-cell full">
-                        <span class="lbl">Finite Values</span>
-                        <span class="val good num" id="verif-finite">&mdash;</span>
-                    </div>
-                    <div class="verif-cell">
-                        <span class="lbl">NaN Count</span>
-                        <span class="val good num" id="verif-nan">0</span>
-                    </div>
-                    <div class="verif-cell">
-                        <span class="lbl">Inf Count</span>
-                        <span class="val good num" id="verif-inf">0</span>
-                    </div>
-                    <div class="verif-cell">
-                        <span class="lbl">Negative tp Count</span>
-                        <span class="val good num" id="verif-negtp">0</span>
-                    </div>
-                    <div class="verif-cell">
-                        <span class="lbl">Perturbation Applied</span>
-                        <span class="val" id="verif-pert">None (Baseline)</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3: Shock Studio -->
+            <!-- Section 2: Shock Studio -->
             <div class="rail-section">
                 <div class="rail-section-title">
                     <span>Shock Studio</span>
@@ -1048,31 +708,6 @@
                         <span>Energy Spread</span>
                     </div>
                     <canvas id="canvas-distance-chart" style="width:100%; height:65px;"></canvas>
-                </div>
-            </div>
-
-            <!-- Section 4: Regional Socio-Economic Impacts -->
-            <div class="rail-section">
-                <div class="rail-section-title">
-                    <span>Regional Impacts</span>
-                    <span style="font-size:9.5px; font-weight:normal; color:var(--text-muted);">Land Only</span>
-                </div>
-
-                <!-- Attribution Summary -->
-                <div id="attribution-summary" style="font-size:10.5px; padding:5px 8px; background-color:#fff; border:1px solid var(--border-subtle); margin-bottom:6px; border-radius:2px; display:none;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>Mean Land &Delta;T: <strong id="attr-dt" class="num">0.00</strong> K</span>
-                        <span>Max &Delta;Rain: <strong id="attr-dr" class="num">0.00</strong> mm</span>
-                    </div>
-                </div>
-
-                <!-- Region Cards Container -->
-                <div id="regional-cards-container"></div>
-
-                <!-- Plain Specific Advisories -->
-                <div style="margin-top:8px;">
-                    <div style="font-size:10px; font-weight:600; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase;">Advisories</div>
-                    <div id="advisories-container"></div>
                 </div>
             </div>
         </aside>
@@ -1220,7 +855,6 @@
                 const ind = document.getElementById('engine-indicator');
                 const txt = document.getElementById('engine-status-text');
                 const alertBox = document.getElementById('offline-alert');
-                const verifHealth = document.getElementById('verif-health');
 
                 if (resp.ok && data.online) {
                     state.online = true;
@@ -1229,10 +863,6 @@
                     txt.textContent = `Engine: Connected (${state.modelName})`;
                     document.getElementById('model-name-text').textContent = state.modelName;
                     alertBox.style.display = 'none';
-                    if (verifHealth) {
-                        verifHealth.textContent = 'Connected (FastAPI :8000)';
-                        verifHealth.className = 'val good';
-                    }
                 } else {
                     setEngineOfflineState();
                 }
@@ -1246,16 +876,11 @@
             const ind = document.getElementById('engine-indicator');
             const txt = document.getElementById('engine-status-text');
             const alertBox = document.getElementById('offline-alert');
-            const verifHealth = document.getElementById('verif-health');
 
             ind.className = 'status-indicator offline';
             txt.textContent = 'Engine: Disconnected (:8000)';
             alertBox.style.display = 'block';
             alertBox.innerHTML = '<strong>Engine Offline:</strong> The FastAPI inference server (<code>serve.py</code> on <code>http://127.0.0.1:8000</code>) is unreachable. Run: <code>python serve.py --port 8000</code>. No dummy predictions are used.';
-            if (verifHealth) {
-                verifHealth.textContent = 'Disconnected (Offline)';
-                verifHealth.className = 'val warn';
-            }
             document.getElementById('sim-status-pill').textContent = 'Disconnected';
             document.getElementById('sim-status-pill').style.color = '#cf222e';
         }
@@ -1277,7 +902,28 @@
         async function startSimulation() {
             const btn = document.getElementById('btn-start-simulation');
             const pill = document.getElementById('sim-status-pill');
-            const verifStatus = document.getElementById('verif-status');
+
+            // CRITICAL FIX: Synchronize state directly from the Scenario dropdown
+            const sc = document.getElementById('sim-scenario-select') ? document.getElementById('sim-scenario-select').value : 'baseline';
+            if (sc === 'baseline') {
+                state.activeShockType = 'null';
+                state.activePreset = null;
+                state.customShock = null;
+                state.shockFootprint = null;
+                document.getElementById('shock-active-badge').textContent = 'Null Shock';
+            } else if (sc === 'warm_ocean') {
+                state.activeShockType = 'preset';
+                state.activePreset = 'warm_ocean';
+                state.customShock = null;
+                document.getElementById('shock-active-badge').textContent = 'Preset: Warm Ocean';
+            } else if (sc === 'monsoon_stall') {
+                state.activeShockType = 'preset';
+                state.activePreset = 'monsoon_stall';
+                state.customShock = null;
+                document.getElementById('shock-active-badge').textContent = 'Preset: Monsoon Stall';
+            } else if (sc === 'custom') {
+                state.activeShockType = 'custom';
+            }
 
             // Set Loading State
             btn.disabled = true;
@@ -1285,7 +931,6 @@
             pill.textContent = 'Simulation Running...';
             pill.style.color = 'var(--warn-amber)';
             document.getElementById('engine-indicator').className = 'status-indicator pending';
-            if (verifStatus) verifStatus.textContent = 'Executing 10-day neural rollout...';
 
             const steps = parseInt(document.getElementById('sim-steps-select').value) || 10;
 
@@ -1316,7 +961,6 @@
                     document.getElementById('offline-alert').innerHTML = `<strong>Simulation Engine Error:</strong> ${errMsg}`;
                     pill.textContent = 'Simulation Error';
                     pill.style.color = 'var(--accent-crimson)';
-                    if (verifStatus) verifStatus.textContent = 'Error';
                     btn.disabled = false;
                     btn.innerHTML = '&#9654; Start Simulation';
                     return;
@@ -1343,13 +987,7 @@
                 pill.textContent = 'Simulation Complete';
                 pill.style.color = 'var(--success-green)';
                 document.getElementById('engine-indicator').className = 'status-indicator online';
-                if (verifStatus) verifStatus.textContent = 'Complete (Real Rollout)';
 
-                updateVerificationPanel(data);
-                updateStatisticsPanel();
-                updateRainfallPanel();
-                renderForecastEvolutionChart();
-                renderImpactPanel(data.impact);
                 renderDistanceChart();
                 updateColorbar();
                 redrawAllMaps();
@@ -1362,306 +1000,6 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '&#9654; Start Simulation';
-            }
-        }
-
-        function updateVerificationPanel(data) {
-            if (!data || !data.baseline) return;
-            const steps = data.steps || data.baseline.length;
-            const nc = 6;
-            const nlat = 32;
-            const nlon = 36;
-            const totalExpected = steps * nc * nlat * nlon;
-
-            let finiteCount = 0;
-            let nanCount = 0;
-            let infCount = 0;
-            let negTpCount = 0;
-
-            for (let s = 0; s < steps; s++) {
-                for (let ch = 0; ch < nc; ch++) {
-                    for (let r = 0; r < nlat; r++) {
-                        for (let c = 0; c < nlon; c++) {
-                            const v = data.baseline[s][ch][r][c];
-                            if (Number.isNaN(v)) {
-                                nanCount++;
-                            } else if (!Number.isFinite(v)) {
-                                infCount++;
-                            } else {
-                                finiteCount++;
-                            }
-                            if (ch === 1 && v < 0) {
-                                negTpCount++;
-                            }
-                        }
-                    }
-                }
-            }
-
-            document.getElementById('verif-health').textContent = state.online ? 'Connected (FastAPI :8000)' : 'Disconnected';
-            document.getElementById('verif-model').textContent = state.modelName || 'multiverse-of-monsoon-r1';
-            document.getElementById('verif-status').textContent = 'Complete (Real Neural Rollout)';
-            document.getElementById('verif-horizon').textContent = `${steps} Days (${steps} Steps)`;
-            document.getElementById('verif-latency').textContent = `${data.inference_ms} ms`;
-            document.getElementById('verif-dims').textContent = `[${steps}, ${nc}, ${nlat}, ${nlon}]`;
-            document.getElementById('verif-finite').textContent = `${finiteCount.toLocaleString()} / ${totalExpected.toLocaleString()} (100%)`;
-            document.getElementById('verif-nan').textContent = nanCount;
-            document.getElementById('verif-inf').textContent = infCount;
-            document.getElementById('verif-negtp').textContent = negTpCount;
-
-            let pertText = 'None (Baseline)';
-            if (data.shock_applied) {
-                if (state.activePreset === 'warm_ocean') pertText = 'Warm Ocean (+3K BoB)';
-                else if (state.activePreset === 'monsoon_stall') pertText = 'Monsoon Stall (-40% winds)';
-                else pertText = 'Custom Perturbation';
-            }
-            document.getElementById('verif-pert').textContent = pertText;
-        }
-
-        function updateStatisticsPanel() {
-            if (!state.baselineRollout) return;
-            const ch = state.currentChannel;
-            const cfg = CHANNEL_CONFIG[ch];
-            const sIdx = state.currentStep - 1;
-
-            const baseSlice = state.baselineRollout[sIdx][ch];
-            const pertSlice = state.perturbedRollout ? state.perturbedRollout[sIdx][ch] : baseSlice;
-            const diffSlice = state.diffRollout ? state.diffRollout[sIdx][ch] : null;
-
-            function getStats(grid, isDiff) {
-                if (!grid) return { min: '—', max: '—', mean: '—', median: '—' };
-                const vals = [];
-                let sum = 0;
-                let min = Infinity;
-                let max = -Infinity;
-
-                for (let r = 0; r < NLAT; r++) {
-                    for (let c = 0; c < NLON; c++) {
-                        let v = grid[r][c];
-                        if (!isDiff) {
-                            if (cfg.isTemp) v -= 273.15;
-                            if (cfg.isMsl) v /= 100.0;
-                        } else {
-                            if (cfg.isMsl) v /= 100.0;
-                        }
-                        vals.push(v);
-                        sum += v;
-                        if (v < min) min = v;
-                        if (v > max) max = v;
-                    }
-                }
-                vals.sort((a, b) => a - b);
-                const mid = Math.floor(vals.length / 2);
-                const median = vals.length % 2 !== 0 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
-                const mean = sum / vals.length;
-
-                return {
-                    min: `${min > 0 && isDiff ? '+' : ''}${min.toFixed(2)} ${cfg.unit}`,
-                    max: `${max > 0 && isDiff ? '+' : ''}${max.toFixed(2)} ${cfg.unit}`,
-                    mean: `${mean > 0 && isDiff ? '+' : ''}${mean.toFixed(2)} ${cfg.unit}`,
-                    median: `${median > 0 && isDiff ? '+' : ''}${median.toFixed(2)} ${cfg.unit}`
-                };
-            }
-
-            const pStats = getStats(baseSlice, false);
-            const bStats = getStats(pertSlice, false);
-            const dStats = getStats(diffSlice, true);
-
-            document.getElementById('stat-prime-min').textContent = pStats.min;
-            document.getElementById('stat-prime-max').textContent = pStats.max;
-            document.getElementById('stat-prime-mean').textContent = pStats.mean;
-            document.getElementById('stat-prime-median').textContent = pStats.median;
-
-            document.getElementById('stat-branch-min').textContent = bStats.min;
-            document.getElementById('stat-branch-max').textContent = bStats.max;
-            document.getElementById('stat-branch-mean').textContent = bStats.mean;
-            document.getElementById('stat-branch-median').textContent = bStats.median;
-
-            document.getElementById('stat-diff-min').textContent = dStats.min;
-            document.getElementById('stat-diff-max').textContent = dStats.max;
-            document.getElementById('stat-diff-mean').textContent = dStats.mean;
-            document.getElementById('stat-diff-median').textContent = dStats.median;
-
-            document.getElementById('stat-day-label').textContent = state.currentStep;
-            document.getElementById('stats-var-title').textContent = `${cfg.name} (${cfg.unit})`;
-        }
-
-        function updateRainfallPanel() {
-            if (!state.baselineRollout) return;
-            const tpCh = 1;
-            const sIdx = state.currentStep - 1;
-            const totalSteps = state.totalSteps || state.baselineRollout.length;
-
-            const dayRain = state.baselineRollout[sIdx][tpCh];
-            let daySum = 0;
-            let dayMax = 0;
-            let cTrace = 0, cLight = 0, cMod = 0, cHeavy = 0;
-            const totalCells = NLAT * NLON;
-
-            for (let r = 0; r < NLAT; r++) {
-                for (let c = 0; c < NLON; c++) {
-                    const v = dayRain[r][c];
-                    daySum += v;
-                    if (v > dayMax) dayMax = v;
-                    if (v < 1.0) cTrace++;
-                    else if (v < 10.0) cLight++;
-                    else if (v < 30.0) cMod++;
-                    else cHeavy++;
-                }
-            }
-            const dayMean = daySum / totalCells;
-
-            let allSum = 0;
-            let allMax = 0;
-            for (let s = 0; s < totalSteps; s++) {
-                for (let r = 0; r < NLAT; r++) {
-                    for (let c = 0; c < NLON; c++) {
-                        const v = state.baselineRollout[s][tpCh][r][c];
-                        allSum += v;
-                        if (v > allMax) allMax = v;
-                    }
-                }
-            }
-            const allMean = allSum / (totalSteps * totalCells);
-
-            document.getElementById('rain-day-mean').textContent = `${dayMean.toFixed(2)} mm`;
-            document.getElementById('rain-day-max').textContent = `${dayMax.toFixed(2)} mm`;
-            document.getElementById('rain-10d-max').textContent = `${allMax.toFixed(2)} mm`;
-            document.getElementById('rain-10d-mean').textContent = `${allMean.toFixed(2)} mm`;
-
-            const pTrace = ((cTrace / totalCells) * 100).toFixed(0);
-            const pLight = ((cLight / totalCells) * 100).toFixed(0);
-            const pMod = ((cMod / totalCells) * 100).toFixed(0);
-            const pHeavy = ((cHeavy / totalCells) * 100).toFixed(0);
-
-            document.getElementById('rain-dist-trace').textContent = `${pTrace}%`;
-            document.getElementById('rain-dist-light').textContent = `${pLight}%`;
-            document.getElementById('rain-dist-mod').textContent = `${pMod}%`;
-            document.getElementById('rain-dist-heavy').textContent = `${pHeavy}%`;
-            document.getElementById('rf-dist-day').textContent = state.currentStep;
-        }
-
-        function renderForecastEvolutionChart() {
-            const canvas = document.getElementById('canvas-forecast-evolution');
-            if (!canvas || !state.baselineRollout) return;
-            const ctx = canvas.getContext('2d');
-            canvas.width = canvas.parentElement.clientWidth - 20;
-            canvas.height = 105;
-
-            const W = canvas.width;
-            const H = canvas.height;
-            ctx.clearRect(0, 0, W, H);
-
-            const ch = state.currentChannel;
-            const cfg = CHANNEL_CONFIG[ch];
-            const totalSteps = state.totalSteps || state.baselineRollout.length;
-
-            const primeMeans = [];
-            const branchMeans = [];
-
-            for (let s = 0; s < totalSteps; s++) {
-                let pSum = 0, bSum = 0;
-                const pGrid = state.baselineRollout[s][ch];
-                const bGrid = state.perturbedRollout ? state.perturbedRollout[s][ch] : pGrid;
-                for (let r = 0; r < NLAT; r++) {
-                    for (let c = 0; c < NLON; c++) {
-                        let pv = pGrid[r][c];
-                        let bv = bGrid[r][c];
-                        if (cfg.isTemp) { pv -= 273.15; bv -= 273.15; }
-                        if (cfg.isMsl) { pv /= 100.0; bv /= 100.0; }
-                        pSum += pv;
-                        bSum += bv;
-                    }
-                }
-                primeMeans.push(pSum / (NLAT * NLON));
-                branchMeans.push(bSum / (NLAT * NLON));
-            }
-
-            const allVals = [...primeMeans, ...branchMeans];
-            let minVal = Math.min(...allVals);
-            let maxVal = Math.max(...allVals);
-            const span = Math.max(maxVal - minVal, 0.1);
-            minVal -= span * 0.1;
-            maxVal += span * 0.1;
-
-            const padLeft = 45;
-            const padRight = 15;
-            const padTop = 15;
-            const padBottom = 22;
-            const plotW = W - padLeft - padRight;
-            const plotH = H - padTop - padBottom;
-
-            // Draw gridlines
-            ctx.strokeStyle = '#e4e0d4';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 3; i++) {
-                const y = padTop + (plotH / 3) * i;
-                ctx.beginPath();
-                ctx.moveTo(padLeft, y);
-                ctx.lineTo(W - padRight, y);
-                ctx.stroke();
-
-                const v = maxVal - ((maxVal - minVal) / 3) * i;
-                ctx.fillStyle = '#57606a';
-                ctx.font = '8.5px sans-serif';
-                ctx.textAlign = 'right';
-                ctx.fillText(v.toFixed(1), padLeft - 4, y + 3);
-            }
-
-            const getX = (stepIdx) => padLeft + (stepIdx / (totalSteps - 1)) * plotW;
-            const getY = (val) => padTop + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
-
-            // Baseline Curve (Oxford Blue)
-            ctx.strokeStyle = '#1a365d';
-            ctx.lineWidth = 1.8;
-            ctx.beginPath();
-            primeMeans.forEach((v, idx) => {
-                const x = getX(idx);
-                const y = getY(v);
-                if (idx === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
-
-            // Perturbed Curve (Crimson Red)
-            if (state.perturbedRollout && state.activeShockType !== 'null') {
-                ctx.strokeStyle = '#9e2a2b';
-                ctx.lineWidth = 1.8;
-                ctx.setLineDash([3, 2]);
-                ctx.beginPath();
-                branchMeans.forEach((v, idx) => {
-                    const x = getX(idx);
-                    const y = getY(v);
-                    if (idx === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                });
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
-
-            // Points and current day highlight
-            for (let s = 0; s < totalSteps; s++) {
-                const x = getX(s);
-                const yp = getY(primeMeans[s]);
-                const isCur = (s === state.currentStep - 1);
-
-                ctx.fillStyle = isCur ? '#0969da' : '#1a365d';
-                ctx.beginPath();
-                ctx.arc(x, yp, isCur ? 4.5 : 2.5, 0, Math.PI * 2);
-                ctx.fill();
-
-                if (state.perturbedRollout && state.activeShockType !== 'null') {
-                    const yb = getY(branchMeans[s]);
-                    ctx.fillStyle = isCur ? '#cf222e' : '#9e2a2b';
-                    ctx.beginPath();
-                    ctx.arc(x, yb, isCur ? 4.5 : 2.5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                ctx.fillStyle = isCur ? '#0969da' : '#57606a';
-                ctx.font = isCur ? 'bold 9px sans-serif' : '8.5px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(`D${s + 1}`, x, H - 6);
             }
         }
 
@@ -1704,9 +1042,28 @@
                 }
             });
 
-            updateStatisticsPanel();
-            updateRainfallPanel();
-            renderForecastEvolutionChart();
+            // Update Difference Peak Badge
+            const peakBadge = document.getElementById('diff-peak-tag');
+            if (peakBadge) {
+                if (diffSlice) {
+                    let maxAbs = 0.0, maxV = 0.0;
+                    for (let r = 0; r < NLAT; r++) {
+                        for (let c = 0; c < NLON; c++) {
+                            const v = diffSlice[r][c];
+                            if (Math.abs(v) > maxAbs) {
+                                maxAbs = Math.abs(v);
+                                maxV = v;
+                            }
+                        }
+                    }
+                    const cfg = CHANNEL_CONFIG[ch];
+                    if (cfg.isMsl) maxV /= 100.0;
+                    peakBadge.textContent = maxAbs < 1e-4 ? 'Δ Peak: 0.00' : `Δ Peak: ${maxV > 0 ? '+' : ''}${maxV.toFixed(2)} ${cfg.unit}`;
+                    peakBadge.style.color = maxV > 0 ? 'var(--accent-crimson)' : (maxV < 0 ? '#0969da' : 'var(--text-muted)');
+                } else {
+                    peakBadge.textContent = 'Δ Peak: 0.00';
+                }
+            }
         }
 
         function drawField(viewId, grid2d, chIdx, isDiff) {
@@ -1763,8 +1120,14 @@
 
                     let rgb;
                     if (isDiff) {
-                        const norm = Math.max(-1.0, Math.min(1.0, val / diffMax));
-                        rgb = getDivergingColor(norm);
+                        if (diffMax < 1e-4) {
+                            rgb = [250, 249, 246];
+                        } else {
+                            const sign = val >= 0 ? 1.0 : -1.0;
+                            // Contrast power curve gamma=0.45 boosts subtle regional anomalies into vivid visibility
+                            const norm = sign * Math.pow(Math.min(1.0, Math.abs(val) / diffMax), 0.45);
+                            rgb = getDivergingColor(norm);
+                        }
                     } else {
                         let phys = val;
                         if (cfg.isTemp) phys = val - 273.15;
@@ -1818,20 +1181,23 @@
         }
 
         function getDivergingColor(norm) {
+            if (Math.abs(norm) < 0.015) {
+                return [250, 249, 246]; // Neutral zero (background paper)
+            }
             if (norm < 0) {
-                const s = -norm;
-                return [
-                    Math.round(246 - s * 160),
-                    Math.round(245 - s * 110),
-                    Math.round(240 - s * 50)
-                ];
+                // Negative deficit: White -> Vivid Sky Blue -> Deep Royal Navy
+                const s = Math.min(1.0, -norm);
+                const r = Math.round(250 - s * 238);
+                const g = Math.round(249 - s * 170);
+                const b = Math.round(246 - s * 55);
+                return [Math.max(12, r), Math.max(79, g), Math.max(191, b)];
             } else {
-                const s = norm;
-                return [
-                    Math.round(246 - s * 60),
-                    Math.round(245 - s * 150),
-                    Math.round(240 - s * 180)
-                ];
+                // Positive surge: White -> Amber Orange -> Vibrant Crimson Red
+                const s = Math.min(1.0, norm);
+                const r = Math.round(250 - s * 35);
+                const g = Math.round(249 - s * 220);
+                const b = Math.round(246 - s * 220);
+                return [Math.max(195, r), Math.max(29, g), Math.max(26, b)];
             }
         }
 
@@ -1996,9 +1362,15 @@
             }
             if (state.perturbedRollout) {
                 let v = state.perturbedRollout[sIdx][ch][r][c];
+                let dv = 0;
+                if (state.diffRollout) {
+                    dv = state.diffRollout[sIdx][ch][r][c];
+                    if (cfg.isMsl) dv /= 100.0;
+                }
                 if (cfg.isTemp) v -= 273.15;
                 if (cfg.isMsl) v /= 100.0;
-                valB = `${v.toFixed(2)} ${cfg.unit}`;
+                const dStr = Math.abs(dv) >= 0.005 ? ` (${dv > 0 ? '+' : ''}${dv.toFixed(2)} ${cfg.unit})` : '';
+                valB = `${v.toFixed(2)} ${cfg.unit}${dStr}`;
             }
             if (state.diffRollout) {
                 let v = state.diffRollout[sIdx][ch][r][c];
@@ -2189,73 +1561,6 @@
             ctx.font = '8.5px sans-serif';
             ctx.fillText('Day 1', 20, H - 3);
             ctx.fillText(`Day ${days.length}`, W - 28, H - 3);
-        }
-
-        function renderImpactPanel(impact) {
-            const container = document.getElementById('regional-cards-container');
-            if (!impact || !impact.regional_insights) return;
-
-            const attrBox = document.getElementById('attribution-summary');
-            if (impact.shock_attribution) {
-                attrBox.style.display = 'block';
-                document.getElementById('attr-dt').textContent = impact.shock_attribution.mean_land_temp_shift_k > 0 ? `+${impact.shock_attribution.mean_land_temp_shift_k}` : impact.shock_attribution.mean_land_temp_shift_k;
-                document.getElementById('attr-dr').textContent = impact.shock_attribution.max_rain_shift_mm;
-            } else {
-                attrBox.style.display = 'none';
-            }
-
-            container.innerHTML = '';
-            impact.regional_insights.forEach(reg => {
-                const card = document.createElement('div');
-                card.className = 'region-card';
-                const hasDelta = reg.delta_accumulated_rain_mm !== undefined;
-
-                card.innerHTML = `
-                    <div class="region-header">
-                        <span>${reg.region}</span>
-                    </div>
-                    <div class="region-metrics-grid">
-                        <div class="metric-cell">
-                            <span class="lbl">Rain</span>
-                            <span class="val num">
-                                ${reg.accumulated_rain_mm} mm
-                                ${hasDelta ? `<span class="delta-tag ${reg.delta_accumulated_rain_mm > 0 ? 'pos' : (reg.delta_accumulated_rain_mm < 0 ? 'neg' : 'zero')}">(${reg.delta_accumulated_rain_mm > 0 ? '+' : ''}${reg.delta_accumulated_rain_mm})</span>` : ''}
-                            </span>
-                        </div>
-                        <div class="metric-cell">
-                            <span class="lbl">Dry Spell</span>
-                            <span class="val num">
-                                ${reg.dry_spell_days} d
-                                ${hasDelta ? `<span class="delta-tag ${reg.delta_dry_spell_days < 0 ? 'pos' : (reg.delta_dry_spell_days > 0 ? 'neg' : 'zero')}">(${reg.delta_dry_spell_days > 0 ? '+' : ''}${reg.delta_dry_spell_days})</span>` : ''}
-                            </span>
-                        </div>
-                        <div class="metric-cell">
-                            <span class="lbl">&gt; 40&deg;C</span>
-                            <span class="val num">
-                                ${reg.days_above_40c} d
-                                ${hasDelta ? `<span class="delta-tag ${reg.delta_days_above_40c > 0 ? 'neg' : 'zero'}">(${reg.delta_days_above_40c > 0 ? '+' : ''}${reg.delta_days_above_40c})</span>` : ''}
-                            </span>
-                        </div>
-                        <div class="metric-cell">
-                            <span class="lbl">10m Wind Power</span>
-                            <span class="val num">
-                                ${reg.wind_power_density_10m_wm2} W/m&sup2;
-                                ${hasDelta ? `<span class="delta-tag pos">(${reg.delta_wind_power_wm2 > 0 ? '+' : ''}${reg.delta_wind_power_wm2})</span>` : ''}
-                            </span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-
-            const advContainer = document.getElementById('advisories-container');
-            advContainer.innerHTML = '';
-            (impact.policy_advisories || []).forEach(adv => {
-                const box = document.createElement('div');
-                box.className = 'advisory-box';
-                box.textContent = adv;
-                advContainer.appendChild(box);
-            });
         }
 
         function toggleCustomStateModal() {
