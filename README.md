@@ -165,17 +165,28 @@ Open **`http://localhost:8501`** in any web browser.
 ```
 ├── serve.py                         # Official offline inference server (FastAPI/uvicorn, port 8000)
 ├── train.py                         # Model training script
-├── eval.py                          # Comprehensive offline evaluation & verification suite
 ├── Multiverse_of_Monsoon_Brief.pdf  # Official 2-page brief PDF (model architecture, failure modes & dashboard)
-├── brief.pdf                        # Official 2-page brief PDF copy
-├── generate_brief_pdf.py            # Reproducible brief PDF generation script
 ├── weights.pt                       # Trained PyTorch model checkpoint (1.57 MB)
 ├── static.pt                        # Bundled static geography tensor [2, 32, 36]
-├── static.npy                       # NumPy static geography array
-├── verify_server.py                 # Automated API contract & schema validation runner
 ├── README.md                        # Comprehensive documentation and user guide
+├── pyproject.toml                   # Project metadata and dependencies
+├── LICENSE / NOTICE                 # MIT licensing terms
+├── docs/                            # In-depth block-by-block technical documentation
+│   ├── BLOCK_1_CLIMATE_INPUT_ENCODER.md
+│   ├── BLOCK_2_MULTI_SCALE_SPATIAL_ENCODER.md
+│   ├── BLOCK_3_TEMPORAL_DYNAMICS_ENCODER.md
+│   ├── BLOCK_4_SPATIAL_CONTEXT_ATTENTION.md
+│   ├── BLOCK_5_FORECAST_DECODER.md
+│   ├── BLOCK_6_RESIDUAL_STATE_TRANSITION.md
+│   ├── R1_CONTRACT.md
+│   └── Multiverse_of_Monsoon_Brief.pdf
+├── scripts/                         # Offline evaluation and development tooling
+│   ├── eval.py                      # Comprehensive holdout evaluation & benchmark suite
+│   ├── generate_brief_pdf.py        # Reproducible 2-page brief PDF generator
+│   └── verify_server.py             # Automated API contract & schema validation runner
 ├── hackdata/
 │   ├── india_climate_train.nc       # ERA5 daily climate observations (2005–2021)
+│   ├── static.npy                   # Static geography NumPy array
 │   ├── stats.json                   # Normalization means and standard deviations
 │   └── SHA256SUMS.txt               # Verification checksum
 ├── monsoon_r1/
@@ -193,6 +204,7 @@ Open **`http://localhost:8501`** in any web browser.
 ├── dashboard/                       # Interactive dashboard application
 │   ├── app.py                       # Dashboard server (port 8501)
 │   ├── impact.py                    # Socio-economic impact calculation engine
+│   ├── static/                      # Bundled geographic polygons and fonts
 │   └── templates/
 │       └── index.html               # Single-page interactive map interface
 └── tests/                           # 110-test unit, regression, & evaluation suite
@@ -204,14 +216,14 @@ Open **`http://localhost:8501`** in any web browser.
 
 | Hackathon Requirement | Status | Verification |
 | :--- | :---: | :--- |
-| **`serve.py` at repo root** | ✅ | Implemented, listens on `0.0.0.0`, loads weights once at startup |
+| **`serve.py` at repo root** | ✅ | Implemented, listens on `0.0.0.0:8000`, loads weights once at startup |
 | **`train.py` at repo root** | ✅ | Implemented, trains on `hackdata/india_climate_train.nc` |
-| **Model weights in repo** | ✅ | `weights.pt` (1.57 MB) stored inside repo root (< 2 GB) |
-| **Static geography bundled** | ✅ | `static.pt` and `static.npy` included in repo root |
+| **Model weights in repo** | ✅ | `weights.pt` (1.57 MB) stored directly inside repo root (< 2 GB) |
+| **Static geography bundled** | ✅ | `static.pt` included in repo root, `static.npy` in `hackdata/` |
 | **Offline execution** | ✅ | No internet / external API dependencies at runtime |
 | **API Contract (/health, /simulate)** | ✅ | Passes `monsoon_r1.schema_validator` with 0 failures |
-| **Latency limit (< 5.0 s / 10 steps)** | ✅ | ~140 ms on CPU (~35x faster than limit) |
+| **Latency limit (< 5.0 s / 10 steps)** | ✅ | ~135 ms on CPU (~37x faster than limit) |
 | **Physical validity gate** | ✅ | Verified $TP \ge 0$, bounded $T_{2m}$, no NaN/Inf |
 | **Causal shocks & null invariance** | ✅ | Shocks propagate coherently; zero shock changes nothing |
 | **Interactive Dashboard & Impact Extension**| ✅ | Separate dashboard in `dashboard/` coupled live to `/simulate` |
-| **Official 2-Page Brief PDF** | ✅ | `Multiverse_of_Monsoon_Brief.pdf` and `brief.pdf` included in repo root |
+| **Official 2-Page Brief PDF** | ✅ | `Multiverse_of_Monsoon_Brief.pdf` (strict 2 pages) in root and `docs/` |
